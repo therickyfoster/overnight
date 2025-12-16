@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>San Francisco Mycelial Solutions — Proof-of-Concept Governance Scaffold</title>
+  <meta name="description" content="Decentralized mycelial solutions index for city governance. Modular smart-contract hooks, open-data ingestion, transparency dashboards, and offline-first UX for rapid pilots." />
+  <meta name="theme-color" content="#0b132b" />
+  <meta name="author" content="Foster + Navi — Planetary Restoration Archive" />
+  
+  <!-- ──────────────────────────────────────────────────────────────────────────
+       INDEX.HTML: San Francisco Mycelial Solutions (PoC)
+       PURPOSE: One-file, online-first dashboard with offline fallback to help
+       governments pilot decentralized, transparent, mycelium‑inspired programs.
+       
+       DESIGN PRINCIPLES
+       - Decentralization: federation of modules; no single control chokepoint.
+       - Transparency: verifiable data trails; cryptographic signatures.
+       - Consent & Zero Harm: publish minimal necessary data, protect identities.
+       - Interoperability: JSON schema, IPFS-ready manifests, EVM/Solana hooks.
+       - Offline-first: Service Worker + IndexedDB for resilient field ops.
+
+       USER PREFERENCES (Foster + Navi)
+       - Standalone index.html w/ integrity banner & rolling SHA-256 display.
+       - IndexedDB for state, tlk.io chat overlay (collapsed by default).
+       - Favor remote APIs over heavy frameworks; no React; progressive modules.
+       - Attribution banner to Planetary Restoration Archive (PRA).
+       - Donation/XMR overlay with helper link.
+
+       SAFETY NOTES
+       - This file avoids destructive or obfuscated behaviors.
+       - Integrity hash is informational; replace EXPECTED_HASH after publishing.
+  ─────────────────────────────────────────────────────────────────────────── -->
+
+  <!-- ── Vars for quick customization (data-* attributes) ───────────────────── -->
+  <meta id="cfg"
+        data-city="San Francisco"
+        data-chain-evm-rpc="https://ethereum.publicnode.com"
+        data-chain-sol-rpc="https://api.mainnet-beta.solana.com"
+        data-ipfs-gateway="https://ipfs.io/ipfs/"
+        data-datasf-root="https://data.sfgov.org/resource/"
+        data-expected-hash="EXPECTED_HASH_TO_SET_POST_DEPLOY"
+        data-tlkio-room="PRA-Mycelial-SF"
+        data-site-owner="Foster + Navi"
+        data-site-url="https://planetaryrestorationarchive.com" />
+
+  <style>
+    :root{
+      --bg:#0b132b; --ink:#e0e6f8; --muted:#9fb3c8; --em:#00d1ff; --ok:#00c896; --warn:#ffc857; --bad:#ff4d6d;
+      --panel:#15223b; --card:#101a30; --accent:#1f2d4d;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 700px at 80% -10%,#17254a 0%,#0b132b 45%,#081023 100%);
+         color:var(--ink);font-family:var(--sans);}
+    a{color:var(--em);text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(10,16,33,.7);backdrop-filter:blur(8px);z-index:20;border-bottom:1px solid #1a2a52}
+    .wrap{max-width:1200px;margin:0 auto;padding:16px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand h1{margin:0;font-size:1.1rem;letter-spacing:.02em}
+    .tag{font-size:.75rem;color:var(--muted)}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){.grid.cols-3{grid-template-columns:1fr 1fr 1fr}}
+    .card{background:linear-gradient(160deg, var(--panel), var(--card)); border:1px solid #1b2c51; border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card h3{margin:.25rem 0 .75rem 0}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;background:#0f1a33;border:1px solid #253459;color:#cfe3ff;font-size:.8rem}
+    .kpi{display:flex;gap:12px;align-items:center}
+    .kpi .val{font-size:1.4rem;font-family:var(--mono)}
+    .muted{color:var(--muted)}
+    footer{opacity:.8}
+    .mono{font-family:var(--mono)}
+    .small{font-size:.85rem}
+    .section-title{margin:24px 0 8px 0; font-weight:700; letter-spacing:.02em}
+    .em{color:var(--em)}
+
+    /* XMR floating overlay */
+    .xmr{position:fixed; right:12px; bottom:12px; z-index:50; display:flex; flex-direction:column; gap:8px; align-items:flex-end}
+    .xmr button{background:#041024; color:#bde3ff; border:1px solid #1b2c51; padding:10px 12px; border-radius:12px; cursor:pointer}
+    .xmr .panel{display:none; background:#0b142c; border:1px solid #23355d; padding:12px; border-radius:12px; width:min(92vw,520px)}
+    .xmr .addr{word-break:break-all; font-family:var(--mono); font-size:.85rem; background:#09132a; padding:8px; border-radius:8px}
+
+    /* Collapsible tlk.io chat launcher */
+    .chat-launch{position:fixed; left:12px; bottom:12px; z-index:50}
+    .chat-launch button{background:#041024; color:#bde3ff; border:1px solid #1b2c51; padding:10px 12px; border-radius:12px; cursor:pointer}
+
+    /* Integrity banner */
+    .integrity{position:fixed; top:8px; right:12px; background:#0d1731; border:1px solid #22355e; padding:8px 12px; border-radius:12px; font-family:var(--mono); font-size:.75rem; z-index:40}
+
+    /* Simple starfield overlay */
+    .stars{position:fixed; inset:0; pointer-events:none; background:transparent; z-index:0}
+    canvas#starfield{width:100%; height:100%}
+  </style>
+  <!-- MapLibre GL JS (map rendering, no external keys required) -->
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet"/>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+</head>
+<body>
+  <!-- ── Starfield cosmetic layer (non-blocking) ───────────────────────────── -->
+  <div class="stars"><canvas id="starfield" aria-hidden="true"></canvas></div>
+
+  <!-- ── Header / Brand / Quick Status ─────────────────────────────────────── -->
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="#5ccfe6"/><path d="M6 14c2.5-1.5 4-1 6-3 2-.5 3.5-2.5 6-3" stroke="#8bd3dd"/></svg>
+        <div>
+          <h1>San Francisco Mycelial Solutions — PoC Governance Scaffold</h1>
+          <div class="tag">Decentralized modules • Transparent data trails • Offline-first • PRA</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ── INTRO: What is a mycelial governance scaffold? ──────────────────── -->
+    <section class="card" id="intro">
+      <h3>Purpose</h3>
+      <p>
+        This single-file pilot demonstrates how a city can orchestrate <span class="em">mycelium‑inspired</span> civic programs using modular, decentralized components. 
+        Each card below can operate standalone or federate into larger systems. Smart‑contract hooks, integrity checks, and open‑data pipes are included for rapid trials.
+      </p>
+      <div class="grid cols-3">
+        <div class="pill">Zero‑Harm & Consent</div>
+        <div class="pill">Cryptographic Transparency</div>
+        <div class="pill">Modular & Forkable</div>
+      </div>
+    </section>
+
+    <!-- ── KPIs: live-ish placeholders (wired to data adapters) ─────────────── -->
+    <section class="grid cols-3" id="kpis">
+      <div class="card kpi"><div>
+        <div class="muted small">Trees mapped (cached)</div>
+        <div class="val" id="kpi-trees">–</div>
+      </div></div>
+      <div class="card kpi"><div>
+        <div class="muted small">311 cases (24h)</div>
+        <div class="val" id="kpi-311">–</div>
+      </div></div>
+      <div class="card kpi"><div>
+        <div class="muted small">Contract intents posted</div>
+        <div class="val" id="kpi-intents">–</div>
+      </div></div>
+    </section>
+
+    <!-- ── MODULES: Mycelial solutions library (extractable) ───────────────── -->
+    <h2 class="section-title">Mycelial Solution Modules</h2>
+
+    <!-- ── Module A: Myco‑Storm Drains (biofiltration) ─────────────────────── -->
+    <!-- INFO: decentralized maintenance bounties for bioswale/drain health -->
+    <section class="card" id="module-drains">
+      <h3>Myco‑Storm Drains (Biofiltration + Bounties)</h3>
+      <p class="muted small">Schema: <code class="mono">mycelial.action.v1</code> • Hook: <code class="mono">evm:postIntent()</code> • Data: Drain cleanout logs / rainfall</p>
+      <details>
+        <summary>Concept & workflow</summary>
+        <p>
+          Use fungal mats and native plants to biofilter storm runoff. Residents propose micro‑actions (inspect, clear debris, photo‑verify), post on‑chain intents, and receive escrowed bounties after quorum verification. 
+          Data feeds visualize hotspots and schedule proactive maintenance before storms.
+        </p>
+      </details>
+      <div class="grid cols-3">
+        <button class="pill" data-action="post-intent" data-module="drains">Post Intent</button>
+        <button class="pill" data-action="view-map" data-module="drains">Open Hotspots</button>
+        <button class="pill" data-action="export-schema" data-module="drains">Export Schema</button>
+      </div>
+    </section>
+
+    <!-- ── Module B: Street‑Tree Mycorrhizae (care credits) ─────────────────── -->
+    <!-- INFO: tree health + mycorrhizal inoculation, community care credits -->
+    <section class="card" id="module-trees">
+      <h3>Street‑Tree Mycorrhizae (Care Credits)</h3>
+      <p class="muted small">Schema: <code class="mono">mycelial.treecare.v1</code> • Feeds: street trees dataset / drought index / heat islands</p>
+      <details>
+        <summary>Concept & workflow</summary>
+        <p>
+          Pair public tree records with micro‑tasking for watering, mulching, and mycorrhizal support. Actions create auditable logs and issue non‑transferable <em>Care Credits</em> for civic reputation—opt‑in only and privacy‑respecting.
+        </p>
+      </details>
+      <div class="grid cols-3">
+        <button class="pill" data-action="sync-trees">Sync Trees</button>
+        <button class="pill" data-action="nearby-tasks">Nearby Tasks</button>
+        <button class="pill" data-action="issue-credit">Issue Care Credit</button>
+      </div>
+    </section>
+
+    <!-- ── Module C: Myco‑Compost Exchange (DAO‑routed) ────────────────────── -->
+    <!-- INFO: households ↔ micro‑haulers ↔ urban farms; DAO fee routed to commons -->
+    <section class="card" id="module-compost">
+      <h3>Myco‑Compost Exchange (DAO‑routed)</h3>
+      <p class="muted small">Schema: <code class="mono">mycelial.exchange.v1</code> • Settlement: 
+        <span class="mono">evm:ERC20</span> or <span class="mono">sol:Program</span> escrow</p>
+      <details>
+        <summary>Concept & workflow</summary>
+        <p>
+          Match residential organics with micro‑haulers and urban farms via transparent order books. Automated settlement routes a small programmable fee to a city commons fund governed by multi‑sig and public proposals.
+        </p>
+      </details>
+      <div class="grid cols-3">
+        <button class="pill" data-action="open-orderbook">Open Order Book</button>
+        <button class="pill" data-action="new-order">Create Order</button>
+        <button class="pill" data-action="governance">Governance</button>
+      </div>
+    </section>
+
+    <!-- ── Smart‑Contract Hooks (minimal, swappable) ───────────────────────── -->
+    <h2 class="section-title">Smart‑Contract Hooks</h2>
+    <section class="card" id="contracts">
+      <p class="muted small">This UI calls generic endpoints so you can swap chains easily. Provide RPC/Web3 providers via the <code class="mono">#cfg</code> meta.</p>
+      <pre class="mono small" aria-label="Solidity reference (minimal)" style="white-space:pre-wrap">// Minimal intent registry (illustrative)
+interface IIntentRegistry {
+  event IntentPosted(address indexed author, bytes32 id, string module, string dataURI);
+  function postIntent(string calldata module, string calldata dataURI) external returns (bytes32);
+}
+// Non-transferable credit (ERC-5192-like minimal)
+interface ICivicCredit { function issue(address to, uint256 amt, string calldata memo) external; }
+</pre>
+      <div class="grid cols-3">
+        <button class="pill" data-action="evm-connect">Connect EVM</button>
+        <button class="pill" data-action="sol-connect">Connect Solana</button>
+        <button class="pill" data-action="simulate">Simulate</button>
+      </div>
+    </section>
+
+    <!-- ── Data Adapters (APIs) ────────────────────────────────────────────── -->
+    <h2 class="section-title">Data Adapters</h2>
+    <section class="card" id="adapters">
+      <p class="muted small">Configure datasets using the <span class="mono">#cfg</span> meta. This ships with Socrata‑style adapter shells for DataSF.</p>
+      <div class="grid cols-3">
+        <div>
+          <h3 class="small">Street Trees</h3>
+          <code class="mono small">/resource/<span data-k="trees-key">2zah-tuvt</span>.json</code>
+        </div>
+        <div>
+          <h3 class="small">311 Cases</h3>
+          <code class="mono small">/resource/<span data-k="311-key">vw6y-z8j6</span>.json</code>
+        </div>
+        <div>
+          <h3 class="small">Rainfall (NOAA proxy)</h3>
+          <code class="mono small">Station feed (set locally)</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Governance & Transparency ───────────────────────────────────────── -->
+    <h2 class="section-title">Transparency & Governance</h2>
+    <section class="card" id="governance">
+      <ul>
+        <li>Public <strong>Proposal</strong> objects (.json) with IPFS CIDs.</li>
+        <li><strong>Multi‑sig</strong> civic wallet with rotating signers, open policy.</li>
+        <li>Non‑transferable <strong>Care Credits</strong> for reputation (opt‑in).</li>
+        <li>Open <strong>Ledger</strong>: intents, fulfillments, disbursements.</li>
+      </ul>
+      <div class="grid cols-3">
+        <button class="pill" data-action="new-proposal">New Proposal</button>
+        <button class="pill" data-action="open-ledger">Open Ledger</button>
+        <button class="pill" data-action="export-manifest">Export .manifest</button>
+      </div>
+    </section>
+
+    <!-- ── Integrity, Hash & Cache ─────────────────────────────────────────── -->
+    <h2 class="section-title">Integrity</h2>
+    <section class="card" id="integrity">
+      <p class="small">This banner shows a rolling SHA‑256 of the current DOM and compares to your published expected hash. Update the expected value after you host this file.</p>
+      <div id="hash-line" class="mono small">hash: …</div>
+      <div id="hash-status" class="mono small muted">status: computing…</div>
+    </section>
+
+    <!-- ── Docs / Schemas (exportable) ─────────────────────────────────────── -->
+    <h2 class="section-title">Schemas</h2>
+    <section class="card" id="schemas">
+      <pre class="mono small" style="white-space:pre-wrap">{
+  "schema": "mycelial.action.v1",
+  "id": "urn:action:${uuid}",
+  "module": "drains|trees|compost|…",
+  "geo": {"lat": 37.7749, "lng": -122.4194},
+  "evidence": [{"type":"photo","uri":"ipfs://…"}],
+  "proposer": "did:key:…",
+  "intent_cid": "bafy…",
+  "fulfillment": {"verifiers":[],"quorum":2,"payout":{"asset":"USDC","amount":5}},
+  "privacy": {"level":"low|med|high","notes":"redact PII"},
+  "timestamp": 0
+}
+</pre>
+      <button class="pill" data-action="save-schema">Save to IndexedDB</button>
+    </section>
+
+      
+    <!-- ── Spatial Hotspots Map (MapLibre) ─────────────────────────────────── -->
+    <!-- INFO: renders 311 and trees sample points; external tiles can be swapped -->
+    <h2 class="section-title">Spatial Hotspots</h2>
+    <section class="card" id="spatial">
+      <div class="small muted">Drag/zoom. Layers: 311 (last 24h), sample Street Trees. Uses Carto Voyager basemap via tiles.json.</div>
+      <div id="map" style="height:420px;border-radius:12px;overflow:hidden;border:1px solid #1b2c51"></div>
+      <div class="grid cols-3" style="margin-top:12px">
+        <button class="pill" data-action="map-refresh">Refresh Layers</button>
+        <button class="pill" data-action="map-fit">Fit to Data</button>
+        <button class="pill" data-action="map-style">Switch Style</button>
+      </div>
+    </section>
+
+    <!-- ── Governance Controls (multisig + IPFS) ───────────────────────────── -->
+    <h2 class="section-title">Governance Controls</h2>
+    <section class="card" id="gov-controls">
+      <div class="small muted">Draft proposals, pin evidence to IPFS (optional), and export verifiable manifests. Secrets (like tokens) are stored locally in IndexedDB cache under key <code class="mono">secrets</code>.</div>
+      <div class="grid cols-3">
+        <button class="pill" data-action="open-proposal-modal">Draft Proposal</button>
+        <button class="pill" data-action="open-settings">Settings</button>
+        <button class="pill" data-action="pin-manifest">Pin Manifest to IPFS</button>
+      </div>
+    </section>
+
+    <!-- ── Modal: Proposal Draft ───────────────────────────────────────────── -->
+    <div id="modal-proposal" style="display:none; position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.6)">
+      <div style="max-width:720px;margin:8vh auto;background:#0b142c;border:1px solid #23355d;border-radius:16px;padding:16px">
+        <h3>New Proposal</h3>
+        <label class="small">Title<br><input id="prop-title" style="width:100%"></label>
+        <label class="small">Module<br>
+          <select id="prop-module" style="width:100%">
+            <option value="drains">Myco‑Storm Drains</option>
+            <option value="trees">Street‑Tree Mycorrhizae</option>
+            <option value="compost">Myco‑Compost Exchange</option>
+          </select>
+        </label>
+        <label class="small">Summary<br><textarea id="prop-summary" rows="5" style="width:100%"></textarea></label>
+        <div class="grid cols-3" style="margin-top:12px">
+          <button class="pill" data-action="prop-save">Save (Local)</button>
+          <button class="pill" data-action="prop-pin">Save + Pin to IPFS</button>
+          <button class="pill" data-action="modal-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Modal: Settings (tokens / endpoints) ────────────────────────────── -->
+    <div id="modal-settings" style="display:none; position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.6)">
+      <div style="max-width:720px;margin:8vh auto;background:#0b142c;border:1px solid #23355d;border-radius:16px;padding:16px">
+        <h3>Settings</h3>
+        <p class="small muted">Optional Web3.Storage token (or any compatible Gateway API). Stored locally only.</p>
+        <label class="small">Web3.Storage Token<br><input id="w3s-token" style="width:100%" type="password" placeholder="..."></label>
+        <div class="grid cols-3" style="margin-top:12px">
+          <button class="pill" data-action="settings-save">Save</button>
+          <button class="pill" data-action="settings-clear">Clear</button>
+          <button class="pill" data-action="modal-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+</main>
+
+  <!-- ── XMR Donation Overlay (Foster + Navi) ─────────────────────────────── -->
+  <aside class="xmr" aria-label="Support overlay">
+    <button id="xmr-toggle" title="Support this work">☯︎ Support</button>
+    <div class="panel" id="xmr-panel">
+      <div class="small muted">XMR address (Foster + Navi):</div>
+      <div class="addr" id="xmr-addr">47LcEP5RYbVMCMXNURuRjq8qHJNeF2aZ339Bp45MYhmMES5Cc61jMZa59BBdY137EyJMqLfQFBvesV6jLjyCFsBVQYftWde</div>
+      <div class="small"><a href="https://planetaryrestorationarchive.com/crypto/xmr" target="_blank" rel="noopener">?</a> Learn about Monero (XMR) contributions</div>
+    </div>
+  </aside>
+
+  <!-- ── tlk.io chat (collapsed launcher) ─────────────────────────────────── -->
+  <aside class="chat-launch" aria-label="Community chat">
+    <button id="chat-open" title="Open community chat">Chat</button>
+  </aside>
+  <div id="chat-frame" style="display:none; position:fixed; left:12px; bottom:60px; width:min(92vw,420px); height:60vh; z-index:49; border:1px solid #1b2c51; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.35)"></div>
+
+  <!-- ── Integrity banner (fixed) ─────────────────────────────────────────── -->
+  <div class="integrity" id="integrity-banner">hash: …</div>
+
+  <!-- ── Core Scripts: utilities, adapters, storage, UI glue ───────────────── -->
+  <script>
+  /* -------------------------------------------------------------------------
+     Utilities
+  -------------------------------------------------------------------------- */
+  const $ = (q, el=document) => el.querySelector(q);
+  const $$ = (q, el=document) => Array.from(el.querySelectorAll(q));
+  const cfg = (()=>{ const m=$('#cfg'); return Object.fromEntries([...m.attributes].filter(a=>a.name.startsWith('data-')).map(a=>[a.name.replace('data-',''), a.value])); })();
+  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+  // Simple uuid v4
+  const uuid = () => ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+
+  // SHA-256 helper
+  async function sha256(text){
+    const enc = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  // Integrity banner — rolling DOM hash vs expected
+  async function updateIntegrity(){
+    const expected = cfg.expected-hash || cfg["expected-hash"] || '';
+    const domText = document.documentElement.outerHTML.replace(/\s+/g,' ');
+    const h = await sha256(domText);
+    $('#integrity-banner').textContent = `hash: ${h.slice(0,16)}…`;
+    $('#hash-line').textContent = `hash: ${h}`;
+    if(expected && expected !== 'EXPECTED_HASH_TO_SET_POST_DEPLOY'){
+      const ok = (h === expected);
+      $('#hash-status').textContent = `status: ${ok? 'MATCH ✅' : 'MISMATCH ⚠️'}`;
+      $('#hash-status').style.color = ok? 'var(--ok)' : 'var(--warn)';
+    } else {
+      $('#hash-status').textContent = 'status: expected hash not set';
+      $('#hash-status').style.color = 'var(--muted)';
+    }
+  }
+
+  // Starfield (cosmetic)
+  function starfield(){
+    const c = $('#starfield');
+    const d = c.getContext('2d');
+    function fit(){ c.width=innerWidth; c.height=innerHeight; }
+    fit(); addEventListener('resize', fit);
+    const stars = Array.from({length:160}, ()=>({x:Math.random()*c.width,y:Math.random()*c.height,z:Math.random()*1+0.2}));
+    function tick(){
+      d.clearRect(0,0,c.width,c.height);
+      for(const s of stars){ s.x -= s.z; if(s.x<0) s.x=c.width; d.fillRect(s.x, s.y, s.z*1.5, s.z*1.5); }
+      requestAnimationFrame(tick);
+    }
+    d.fillStyle = '#6278a5'; tick();
+  }
+
+  /* -------------------------------------------------------------------------
+     IndexedDB (tiny wrapper)
+  -------------------------------------------------------------------------- */
+  const idb = {
+    db:null,
+    async open(){
+      return new Promise((res,rej)=>{
+        const req = indexedDB.open('mycelial-sf', 1);
+        req.onupgradeneeded = e=>{
+          const db = e.target.result;
+          db.createObjectStore('schemas', {keyPath:'id'});
+          db.createObjectStore('ledger', {keyPath:'id'});
+          db.createObjectStore('cache', {keyPath:'key'});
+        };
+        req.onsuccess = ()=>{ idb.db = req.result; res(idb.db); };
+        req.onerror = ()=>rej(req.error);
+      });
+    },
+    put(store, obj){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readwrite'); tx.objectStore(store).put(obj); tx.oncomplete=()=>res(true); tx.onerror=()=>rej(tx.error); }); },
+    get(store, key){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly'); const r=tx.objectStore(store).get(key); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); },
+    all(store){ return new Promise((res,rej)=>{ const tx=this.db.transaction(store,'readonly'); const r=tx.objectStore(store).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); }); }
+  };
+
+  /* -------------------------------------------------------------------------
+     DataSF (Socrata) Adapters — lightweight
+  -------------------------------------------------------------------------- */
+  const adapters = {
+    async datasf(path, params={}){
+      const base = cfg.datasf-root || cfg["datasf-root"];
+      const url = new URL(base + path);
+      for(const [k,v] of Object.entries(params)) url.searchParams.set(k,v);
+      const r = await fetch(url.toString());
+      if(!r.ok) throw new Error('DataSF error');
+      return r.json();
+    },
+    // Street trees (example resource key is editable in UI label)
+    async trees(limit=100){
+      const key = $('[data-k="trees-key"]').textContent.trim();
+      return adapters.datasf(`${key}.json`, {$limit: String(limit)});
+    },
+    // 311 cases (24h)
+    async threeoneone(limit=50){
+      const key = $('[data-k="311-key"]').textContent.trim();
+      const dt = new Date(Date.now()-24*3600*1000).toISOString();
+      return adapters.datasf(`${key}.json`, {$limit: String(limit), $where: `opened > '${dt}'`});
+    }
+  };
+
+  /* -------------------------------------------------------------------------
+     Minimal EVM & Solana connect shims (non-custodial)
+  -------------------------------------------------------------------------- */
+  const chains = {
+    async evmConnect(){ if(window.ethereum){ const acc = await window.ethereum.request({method:'eth_requestAccounts'}); return {provider:'injected', accounts:acc}; } throw new Error('No EVM wallet detected'); },
+    async solConnect(){ if(window.solana?.isPhantom){ const r = await window.solana.connect(); return {provider:'phantom', pubkey:r.publicKey.toString()}; } throw new Error('No Solana wallet detected'); }
+  };
+
+  /* -------------------------------------------------------------------------
+     UI Actions
+  -------------------------------------------------------------------------- */
+  async function onClick(e){
+    const b = e.target.closest('button.pill'); if(!b) return;
+    const action = b.getAttribute('data-action');
+    try{
+      if(action==='post-intent'){
+        const module = b.getAttribute('data-module');
+        const obj = {schema:'mycelial.action.v1', id: 'urn:action:'+uuid(), module, timestamp: Date.now()};
+        await idb.put('ledger', obj); alert('Intent staged locally (demo). Open Ledger to view.');
+      }
+      if(action==='view-map'){
+        alert('Hotspot map not bundled — connect a tileserver or MapLibre externally.');
+      }
+      if(action==='export-schema'){
+        const blob = new Blob([JSON.stringify({schema:'mycelial.action.v1'}, null, 2)], {type:'application/json'});
+        const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'mycelial.action.v1.json'}); a.click();
+      }
+      if(action==='sync-trees'){
+        const data = await adapters.trees(200);
+        $('#kpi-trees').textContent = data.length.toLocaleString();
+        await idb.put('cache', {key:'trees-sample', data, t:Date.now()});
+        alert('Trees cached in IndexedDB (sample).');
+      }
+      if(action==='nearby-tasks'){
+        alert('Nearby tasks use geolocation → match to tree needs (not bundled in demo).');
+      }
+      if(action==='issue-credit'){
+        const id = uuid(); await idb.put('ledger', {id, type:'credit', amt:1, memo:'tree care', t:Date.now()});
+        alert('Care Credit staged locally (demo).');
+      }
+      if(action==='open-orderbook'){
+        alert('Order book UI is modular; plug in your preferred DEX/escrow.');
+      }
+      if(action==='new-order'){
+        const id = uuid(); await idb.put('ledger', {id, type:'order', side:'supply', t:Date.now()}); alert('Order created (local demo).');
+      }
+      if(action==='governance'){
+        alert('Connect multi‑sig UI or Safe App externally; this scaffold stays vendor‑neutral.');
+      }
+      if(action==='evm-connect'){
+        const r = await chains.evmConnect(); alert('EVM connected: '+ JSON.stringify(r));
+      }
+      if(action==='sol-connect'){
+        const r = await chains.solConnect(); alert('Solana connected: '+ JSON.stringify(r));
+      }
+      if(action==='simulate'){
+        const count = (await idb.all('ledger')).length; alert(`Local simulation ledger entries: ${count}`);
+      }
+      if(action==='new-proposal'){
+        const id = uuid(); const obj = {id, type:'proposal', title:'Sample: Myco‑Storm Drains', t:Date.now()}; await idb.put('ledger', obj); alert('Proposal drafted (local demo).');
+      }
+      if(action==='open-ledger'){
+        const all = await idb.all('ledger');
+        const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
+        const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'ledger.json'}); a.click();
+      }
+      if(action==='export-manifest'){
+        const manifest = {owner: cfg['site-owner'], url: cfg['site-url'], city: cfg.city, ts: Date.now()};
+        const blob = new Blob([JSON.stringify(manifest, null, 2)], {type:'application/json'});
+        const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'mycelial.manifest.json'}); a.click();
+      }
+      if(action==='save-schema'){
+        const id = 'schema:'+uuid(); await idb.put('schemas', {id, name:'mycelial.action.v1', ts:Date.now()}); alert('Schema saved locally.');
+      }
+    }catch(err){ console.error(err); alert('Action failed: '+err.message); }
+  }
+
+  /* -------------------------------------------------------------------------
+     tlk.io chat embed (collapsed by default)
+  -------------------------------------------------------------------------- */
+  function openChat(){
+    const room = cfg['tlkio-room'];
+    const frame = document.createElement('iframe');
+    frame.src = `https://embed.tlk.io/${encodeURIComponent(room)}?custom_css_url=`;
+    frame.width='100%'; frame.height='100%'; frame.allow='microphone; camera';
+    $('#chat-frame').innerHTML=''; $('#chat-frame').appendChild(frame); $('#chat-frame').style.display='block';
+  }
+
+  /* -------------------------------------------------------------------------
+     Dynamic Service Worker (from Blob) for offline cache
+  -------------------------------------------------------------------------- */
+  async function registerSW(){
+    if(!('serviceWorker' in navigator)) return;
+    const swCode = `self.addEventListener('install',e=>{e.waitUntil(caches.open('mycelial-sf').then(c=>c.addAll(['./'])))});
+self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const cp=res.clone(); caches.open('mycelial-sf').then(c=>c.put(e.request,cp)); return res;})).catch(()=>caches.match('./')))});`;
+    const blob = new Blob([swCode], {type:'text/javascript'});
+    const url = URL.createObjectURL(blob);
+    try{ await navigator.serviceWorker.register(url); }catch(err){ console.warn('SW failed', err); }
+  }
+
+  /* -------------------------------------------------------------------------
+     Map, IPFS & Modal utilities
+  -------------------------------------------------------------------------- */
+  let map, mapStyleIndex=0;
+  const MAP_STYLES = [
+    'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+    'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+  ];
+  async function mapInit(){
+    if(!window.maplibregl) return; // MapLibre not loaded
+    map = new maplibregl.Map({
+      container:'map', style: MAP_STYLES[1], center:[-122.4194,37.7749], zoom:11});
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    map.on('load', async ()=>{
+      try{
+        const c311 = await adapters.threeoneone(200);
+        const pts311 = {type:'FeatureCollection', features: c311.map(r=>({type:'Feature', properties:{type:'311', note:r.service_details||''}, geometry:{type:'Point', coordinates:[Number(r.point?.longitude)||-122.4194, Number(r.point?.latitude)||37.7749]}}))});
+        map.addSource('s311', {type:'geojson', data: pts311});
+        map.addLayer({id:'s311', type:'circle', source:'s311', paint:{'circle-radius':4,'circle-opacity':0.7}});
+      }catch{ /* ignore */ }
+      try{
+        const cached = await idb.get('cache','trees-sample');
+        if(cached?.data?.length){
+          const ptsT = {type:'FeatureCollection', features: cached.data.slice(0,500).map(r=>({type:'Feature', properties:{type:'tree', species:r.qspecies||r.species||''}, geometry:{type:'Point', coordinates:[Number(r.longitude)||-122.4194, Number(r.latitude)||37.7749]}}))});
+          map.addSource('trees', {type:'geojson', data: ptsT});
+          map.addLayer({id:'trees', type:'circle', source:'trees', paint:{'circle-radius':3,'circle-color':'#5ccfe6','circle-opacity':0.6}});
+        }
+      }catch{ /* ignore */ }
+    });
+  }
+  function mapRefresh(){ if(map){ map.remove(); map=null; setTimeout(mapInit, 50);} }
+  function mapFit(){ if(map && map.getSource('s311')){ const b = turfBBox(map.getSource('s311')._data||{type:'FeatureCollection',features:[]}); map.fitBounds([[b[0],b[1]],[b[2],b[3]]], {padding:30}); } }
+  function mapStyle(){ if(map){ mapStyleIndex=(mapStyleIndex+1)%MAP_STYLES.length; map.setStyle(MAP_STYLES[mapStyleIndex]); } }
+
+  // Tiny bbox helper using minimal turf-like bbox implementation
+  function turfBBox(fc){
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity; (fc.features||[]).forEach(f=>{const [x,y]=f.geometry.coordinates; if(x<minX)minX=x; if(y<minY)minY=y; if(x>maxX)maxX=x; if(y>maxY)maxY=y;});
+    if(!isFinite(minX)) return [-122.55,37.70,-122.35,37.82];
+    return [minX,minY,maxX,maxY];
+  }
+
+  // Modal helpers
+  function showModal(id){ const el = document.getElementById(id); if(el) el.style.display='block'; }
+  function hideModals(){ ['modal-proposal','modal-settings'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; }); }
+
+  // IPFS helper (Web3.Storage-compatible). Token stored in idb cache under key 'secrets'.
+  async function getSecrets(){ try{ const s = await idb.get('cache','secrets'); return s?.data||{}; }catch{return {};} }
+  async function setSecrets(data){ await idb.put('cache',{key:'secrets', data, t:Date.now()}); }
+  async function ipfsPutJson(obj){
+    const secrets = await getSecrets();
+    const token = secrets.w3sToken; if(!token) throw new Error('Missing Web3.Storage token (set in Settings).');
+    const r = await fetch('https://api.web3.storage/upload', {method:'POST', headers:{Authorization:`Bearer ${token}`}, body:new Blob([JSON.stringify(obj)])});
+    if(!r.ok) throw new Error('IPFS pin failed');
+    const cid = r.headers.get('X-Ipfs-Cid') || (await r.json()).cid; return cid;
+  }
+
+  // Strip image metadata by re-encoding through canvas (privacy guardrail)
+  async function stripImageMetadata(file){
+    const img = new Image(); img.src = URL.createObjectURL(file); await img.decode();
+    const c = document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight; const d=c.getContext('2d'); d.drawImage(img,0,0); return new Promise(res=> c.toBlob(res, file.type||'image/png', 0.92));
+  }
+
+/* -------------------------------------------------------------------------
+     Boot
+  -------------------------------------------------------------------------- */
+  (async function(){
+    document.addEventListener('click', onClick);
+    // close modals on backdrop click
+    document.addEventListener('click', (e)=>{ if(e.target.id==='modal-proposal'||e.target.id==='modal-settings'){ hideModals(); }});
+    $('#chat-open').addEventListener('click', openChat);
+    $('#xmr-toggle').addEventListener('click', ()=>{
+      const p = $('#xmr-panel'); p.style.display = (p.style.display==='block'?'none':'block');
+    });
+    await idb.open();
+    starfield();
+    try{ mapInit(); }catch(_){}
+    registerSW();
+    updateIntegrity(); setInterval(updateIntegrity, 5000);
+
+    // Warm-up DataSF KPIs (best-effort; failures are non-fatal)
+    try{ const c311 = await adapters.threeoneone(25); $('#kpi-311').textContent = c311.length; }catch(_){ $('#kpi-311').textContent = 'n/a'; }
+    try{ const cached = await idb.get('cache','trees-sample'); $('#kpi-trees').textContent = cached? cached.data.length : '–'; }catch(_){ }
+    try{ const ledger = await idb.all('ledger'); $('#kpi-intents').textContent = ledger.length; }catch(_){ }
+    })();
+
+  // Extend click actions for new UI
+  document.addEventListener('click', async (e)=>{
+    const b = e.target.closest('button.pill'); if(!b) return; const act=b.getAttribute('data-action');
+    try{
+      if(act==='open-proposal-modal'){ showModal('modal-proposal'); }
+      if(act==='modal-close'){ hideModals(); }
+      if(act==='settings-clear'){ await setSecrets({}); alert('Cleared.'); }
+      if(act==='settings-save'){
+        const tok = document.getElementById('w3s-token').value.trim(); await setSecrets({w3sToken:tok}); alert('Saved locally.'); hideModals(); }
+      if(act==='open-settings'){ const s=await getSecrets(); document.getElementById('w3s-token').value = s.w3sToken||''; showModal('modal-settings'); }
+      if(act==='prop-save' || act==='prop-pin'){
+        const title=$('#prop-title').value.trim(); const module=$('#prop-module').value; const summary=$('#prop-summary').value.trim();
+        const obj={id: uuid(), type:'proposal', title, module, summary, t:Date.now()}; await idb.put('ledger', obj);
+        if(act==='prop-pin'){ const cid = await ipfsPutJson(obj); alert('Pinned to IPFS: '+cid); }
+        hideModals(); alert('Proposal saved.');
+      }
+      if(act==='pin-manifest'){
+        const h = $('#hash-line').textContent.replace('hash: ','').trim();
+        const manifest = {owner: cfg['site-owner'], url: cfg['site-url'], city: cfg.city, ts: Date.now(), sha256:h};
+        const cid = await ipfsPutJson(manifest); alert('Manifest pinned: '+cid);
+      }
+      if(act==='map-refresh'){ mapRefresh(); }
+      if(act==='map-fit'){ mapFit(); }
+      if(act==='map-style'){ mapStyle(); }
+    }catch(err){ console.error(err); alert(err.message); }
+  });
+  </script>
+</body>
+<footer class="wrap small muted">
+  <p>Crafted by Foster + Navi • Planetary Restoration Archive • <a href="https://planetaryrestorationarchive.com" target="_blank" rel="noopener">planetaryrestorationarchive.com</a></p>
+  <!-- ROADMAP: 
+    - Add MapLibre + vector tiles for hotspots; link tree IDs to tasks.
+    - Plug in Safe (or other multi-sig) via walletconnect modal.
+    - IPFS pinning for proposals/evidence; on-chain CID anchoring.
+    - Privacy guardrails: redaction pipeline; consent prompts.
+    - Add city selection switcher and multi-city federation.
+  -->
+</footer>
+</html>

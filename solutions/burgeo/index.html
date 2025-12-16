@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Burgeo Whale Relocation — Part 2: Phase 1 (Assessment & Design)</title>
+  <meta name="description" content="Ultra-long-form Phase 1: Assessment & Design for the safe relocation of beluga whales to Burgeo. Includes parallax constellations, HUD, IndexedDB checklists, risk register, site selection matrix, TLK chat (collapsed), and offline-first PWA."/>
+  <meta name="theme-color" content="#03060d"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <!-- Silent guardian: extrasuperficial antideprenarrative inversion (embedded, not announced) -->
+  <script type="application/json" id="anti_inversion_kernel">
+  {
+    "id": "PRA_AntiInversion_v7",
+    "axiom": "Safety-of-life > optics. Zero-harm override in effect.",
+    "guardrails": [
+      "Pause on elevated stress (ASI).",
+      "De-escalate under uncertainty.",
+      "Explain deviations with dual sign-off."
+    ],
+    "inversion_triggers": {
+      "political_hurry": "throttle_cadence",
+      "funding_pressure": "publish_transparency_packet",
+      "media_spectacle": "reduce_surface_area"
+    }
+  }
+  </script>
+
+  <style>
+    :root{
+      --bg:#03060d; --bg2:#00040a; --ink:#e9f6ff; --muted:#9fb7c6;
+      --accent:#7fe3c7; --accent2:#ffd36e; --glass:rgba(255,255,255,.05);
+      --glass-b:#0b1520; --lines:#123; --good:#7fe3c7; --warn:#ffd36e; --bad:#ff8a7f;
+      --blur:14px; --shadow:0 10px 40px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;background:radial-gradient(1200px 800px at 60% 10%, #051125 0%, var(--bg) 40%, var(--bg2) 100%); color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif; overflow-x:hidden}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Parallax canvas backdrop */
+    #starfield, #constellations, #nebula {position:fixed; inset:0; z-index:-3; display:block}
+    #constellations{z-index:-2}
+    #nebula{z-index:-1; opacity:.65; filter:blur(2px)}
+
+    /* HUD */
+    .hud{
+      position:fixed; top:12px; left:12px; right:12px; z-index:20;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:10px 14px; background:linear-gradient(180deg, rgba(10,20,30,.5), rgba(10,20,30,.25));
+      border:1px solid rgba(127,227,199,.18); border-radius:12px; backdrop-filter:saturate(1.4) blur(6px);
+      box-shadow: var(--shadow);
+    }
+    .hud .brand{display:flex; align-items:center; gap:10px}
+    .logo{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #7fe3c7, #073); box-shadow:0 0 10px #7fe3c7aa}
+    .hud .brand h1{font-size:16px; margin:0; letter-spacing:.4px}
+    .hud .meters{display:flex; gap:10px; flex-wrap:wrap}
+    .meter{display:flex; align-items:center; gap:8px; padding:6px 10px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:10px}
+    .meter b{font-size:12px; color:var(--muted)}
+    .bar{width:120px;height:6px;background:#0a1a25;border-radius:4px;overflow:hidden}
+    .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--good),#3bb4ff);width:34%}
+    .hud .nav{display:flex; gap:8px; flex-wrap:wrap}
+    .hud .nav a{padding:6px 10px; border-radius:8px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1)}
+
+    /* Page layout */
+    main{max-width:1200px;margin:120px auto 140px auto;padding:0 18px}
+    section{margin:48px 0; padding:28px; background:linear-gradient(180deg, rgba(10,20,30,.35), rgba(10,20,30,.2)); border:1px solid rgba(127,227,199,.15); border-radius:16px; backdrop-filter:blur(5px); box-shadow:var(--shadow)}
+    section h2{margin:0 0 10px 0; font-size:28px; letter-spacing:.3px}
+    section p{line-height:1.6; color:var(--ink)}
+    .muted{color:var(--muted)}
+    .callout{border-left:4px solid var(--accent); padding:14px 16px; margin:16px 0; background:rgba(127,227,199,.07); border-radius:8px}
+    .warn{border-left:4px solid var(--warn); background:rgba(255,211,110,.07)}
+    .grid{display:grid; gap:16px}
+    @media(min-width:900px){ .grid.cols-2{grid-template-columns:1fr 1fr} .grid.cols-3{grid-template-columns:repeat(3,1fr)} .grid.cols-4{grid-template-columns:repeat(4,1fr)}}
+    .chip{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); margin:4px 6px 0 0; font-size:13px}
+    .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .pill{padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); font-size:12px}
+    .small{font-size:12px}
+
+    /* Tables / matrix */
+    table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:12px; background:rgba(255,255,255,.03)}
+    th, td{padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.08); vertical-align:top}
+    th{position:sticky; top:0; background:rgba(10,20,30,.55); backdrop-filter:blur(8px)}
+    tr:last-child td{border-bottom:none}
+
+    /* Tooltip */
+    [data-tip]{position:relative; cursor:help; text-decoration:underline dotted rgba(255,255,255,.4)}
+    [data-tip]:hover::after{
+      content:attr(data-tip); position:absolute; left:0; top:calc(100% + 8px);
+      background:#0b1520; color:var(--ink); border:1px solid rgba(255,255,255,.15);
+      padding:8px 10px; font-size:12px; border-radius:8px; white-space:pre-wrap; width:min(360px, 86vw); z-index:3; box-shadow:var(--shadow)
+    }
+
+    /* TLK chat toggle (collapsed by default) */
+    .chat-toggle{position:fixed; bottom:18px; right:18px; z-index:30; display:flex; align-items:center; gap:8px; padding:10px 12px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); backdrop-filter:blur(5px)}
+    .chat-panel{position:fixed; bottom:76px; right:18px; width:min(420px, 94vw); height:min(540px, 70vh); z-index:29; display:none; border-radius:14px; overflow:hidden; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.15)}
+    .chat-panel iframe{width:100%; height:100%; border:0; background:#0b1520}
+
+    /* Parallax sections */
+    .parallax{transform:translateZ(0)}
+
+    /* Progress ring */
+    .ring{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--good) var(--deg,0deg), rgba(255,255,255,.1) 0); position:relative}
+    .ring::after{content:attr(data-label); position:absolute; inset:8px; background:#0a1622; border-radius:50%; display:grid; place-items:center; font-size:12px; color:var(--muted); border:1px solid rgba(255,255,255,.08)}
+  </style>
+</head>
+<body>
+  <!-- Animated parallax cosmic layers -->
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <canvas id="constellations" aria-hidden="true"></canvas>
+  <canvas id="nebula" aria-hidden="true"></canvas>
+
+  <!-- HUD -->
+  <div class="hud parallax" data-depth="0.1" role="navigation" aria-label="HUD navigation">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <h1>Burgeo Whale Relocation • Part 2 — Phase 1 (Assessment & Design)</h1>
+    </div>
+    <div class="meters">
+      <div class="meter" data-tip="Animal Stress Index (ASI). Lower is better.">
+        <b>ASI</b><div class="bar"><i id="asiBar" style="width:22%"></i></div>
+      </div>
+      <div class="meter" data-tip="Cumulative Risk Budget consumed for Phase 1.">
+        <b>Risk</b><div class="bar"><i id="riskBar" style="width:15%"></i></div>
+      </div>
+      <div class="meter" data-tip="Stakeholder Consent Alignment.">
+        <b>Consent</b><div class="bar"><i id="consentBar" style="width:68%"></i></div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">Part 1</a>
+      <a href="#" onclick="scrollToSection('site')">Site Matrix</a>
+      <a href="#" onclick="scrollToSection('permits')">Permits</a>
+      <a href="#" onclick="scrollToSection('vet')">Veterinary</a>
+      <a href="#" onclick="scrollToSection('biosec')">Biosecurity</a>
+      <a href="#" onclick="scrollToSection('acoustic')">Acoustics</a>
+      <a href="#" onclick="scrollToSection('community')">Community</a>
+      <a href="#" onclick="scrollToSection('risk')">Risk Register</a>
+      <a href="#" onclick="scrollToSection('gantt')">Timeline</a>
+      <a href="phase2.html">Next: Phase 2</a>
+    </nav>
+  </div>
+
+  <main>
+    <!-- INTRO -->
+    <section class="parallax" data-depth="0.05" aria-labelledby="hdr-intro">
+      <h2 id="hdr-intro">Phase 1 Overview — Assessment & Design</h2>
+      <p>This phase converts ethos into engineering. We survey candidate sanctuary zones near Burgeo, map permits and responsibilities, baseline whale health, codify biosecurity, chart acoustic envelopes, brief the community, and pressure-test logistics. All tools below save to your browser (IndexedDB) and run offline.</p>
+      <div class="callout warn"><strong>Zero-Rush Clause:</strong> If any subsystem (health, biosecurity, acoustics, consent, logistics) drops below readiness 0.7, the phase holds automatically.</div>
+      <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:10px">
+        <div class="ring" id="ringPhase" data-label="Ready 0.62"></div>
+        <div class="ring" id="ringBio" data-label="Bio 0.58"></div>
+        <div class="ring" id="ringLegal" data-label="Legal 0.44"></div>
+        <div class="ring" id="ringComms" data-label="Comms 0.73"></div>
+      </div>
+    </section>
+
+    <!-- SITE SELECTION MATRIX -->
+    <section id="site" class="parallax" data-depth="0.04" aria-labelledby="hdr-site">
+      <h2 id="hdr-site">Site Selection Matrix (Burgeo-Proximal Ocean Sanctuary)</h2>
+      <p>Score candidate coves/bays against beluga requirements. Weightings are adjustable; overall score drives the “go/hold” gate.</p>
+      <div class="grid cols-3">
+        <div>
+          <h3>Criteria & Weights</h3>
+          <ul class="small">
+            <li>Thermal regime (0.15)</li>
+            <li>Salinity & flow (0.10)</li>
+            <li>Depth & bathymetry (0.10)</li>
+            <li>Prey availability (0.15)</li>
+            <li>Noise & traffic (0.15)</li>
+            <li>Predation risk (0.05)</li>
+            <li>Storm exposure (0.10)</li>
+            <li>Infrastructure access (0.10)</li>
+            <li>Community compatibility (0.10)</li>
+          </ul>
+          <button class="btn" onclick="addSite()">Add Candidate Site</button>
+          <button class="btn" onclick="calcSites()">Recalculate</button>
+        </div>
+        <div style="grid-column: span 2;">
+          <table id="siteTable">
+            <thead>
+              <tr>
+                <th>Site</th><th data-tip="0–1">Thermal</th><th>Salinity</th><th>Depth</th><th>Prey</th><th>Noise</th><th>Pred.</th><th>Storm</th><th>Infra</th><th>Comm.</th><th>Score</th><th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="small muted" id="siteSummary" style="margin-top:8px">No sites yet. Add two or more to compare.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERMITS & LEGAL -->
+    <section id="permits" class="parallax" data-depth="0.035" aria-labelledby="hdr-permits">
+      <h2 id="hdr-permits">Permits, EIA & Legal Instruments</h2>
+      <p>Map the legal terrain. Each item is a living task with owner, due date, and attachments (saved locally).</p>
+      <div class="grid cols-2">
+        <div>
+          <table id="permTable">
+            <thead><tr><th>Instrument</th><th>Owner</th><th>Due</th><th>Status</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <button class="btn" onclick="addPermit()">Add Instrument</button>
+        </div>
+        <div>
+          <div class="callout">
+            <b>Examples (adjust to counsel guidance):</b>
+            <ul class="small">
+              <li>EIA (Environmental Impact Assessment)</li>
+              <li>Federal Marine Mammal Permit</li>
+              <li>Transport Canada Navigation Notice</li>
+              <li>Indigenous consultation MOUs</li>
+              <li>Water quality discharge approvals (temporary pens)</li>
+              <li>Biosecurity protocol sign-offs</li>
+            </ul>
+          </div>
+          <div class="small muted">Attach docs via “paperclip” input; stored as DataURLs in your browser (private/offline).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VETERINARY BASELINES -->
+    <section id="vet" class="parallax" data-depth="0.03" aria-labelledby="hdr-vet">
+      <h2 id="hdr-vet">Veterinary Baselines & Cohort Integrity</h2>
+      <p>Record per-animal health screens and social bonds. Preserve mother–calf pairs and established sub-pods.</p>
+      <div class="grid cols-2">
+        <div>
+          <form id="vetForm" onsubmit="saveVet(event)">
+            <div class="grid cols-2">
+              <label>Animal ID <input required name="id" placeholder="e.g., B-17"/></label>
+              <label>Age <input required name="age" type="number" min="0" step="0.1"/></label>
+              <label>Sex
+                <select name="sex"><option>Unknown</option><option>F</option><option>M</option></select>
+              </label>
+              <label>Mass (kg) <input name="mass" type="number" min="0" step="1"/></label>
+              <label>Mother/Calf Link <input name="bond" placeholder="e.g., B-17 ↔ B-22"/></label>
+              <label>Notes <input name="notes" placeholder="behavior, diet, temperament"/></label>
+              <label>Pathogen Panel <input type="file" name="panel" accept=".pdf,.png,.jpg,.jpeg"/></label>
+              <label>Biomarkers ASI <input name="asi" type="number" min="0" max="1" step="0.01" value="0.20"/></label>
+            </div>
+            <button class="btn" type="submit">Save Animal</button>
+          </form>
+        </div>
+        <div>
+          <table id="vetTable">
+            <thead><tr><th>ID</th><th>Age</th><th>Sex</th><th>Mass</th><th>Bond</th><th>ASI</th><th>Notes</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="small muted">ASI = Animal Stress Index (0–1). Redline ≥ 0.35 triggers pause & comfort protocol.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BIOSECURITY -->
+    <section id="biosec" class="parallax" data-depth="0.025" aria-labelledby="hdr-biosec">
+      <h2 id="hdr-biosec">Biosecurity Protocol (Two-Way Protection)</h2>
+      <p>Prevent pathogen transfer from facility → ocean and ocean → whales. Water systems, PPE, quarantine, and waste handling are non-negotiable.</p>
+      <div class="grid cols-2">
+        <div>
+          <table id="bioTable">
+            <thead><tr><th>Step</th><th>Owner</th><th>Due</th><th>Done</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <button class="btn" onclick="addBio()">Add Step</button>
+        </div>
+        <div>
+          <div class="callout">
+            <b>Baseline SOPs:</b>
+            <ul class="small">
+              <li>Quarantine period & retest interval</li>
+              <li>Transport tank sterilization (pre/post)</li>
+              <li>Dedicated PPE zones & disposal flow</li>
+              <li>Water intake/return UV & filtration checks</li>
+              <li>Vessel deck biohazard controls</li>
+              <li>Incident logging & deviation review</li>
+            </ul>
+          </div>
+          <div class="small muted">Deviation requests require Vet Lead + Welfare Officer sign-off with rationale stored below.</div>
+          <textarea id="bioDeviation" rows="5" style="width:100%; background:rgba(255,255,255,.04); color:var(--ink); border:1px solid rgba(255,255,255,.12); border-radius:8px" placeholder="Record any requested deviations & rationale..."></textarea>
+          <button class="btn" onclick="saveBioDeviation()">Save Deviation</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACOUSTICS & TRAFFIC -->
+    <section id="acoustic" class="parallax" data-depth="0.02" aria-labelledby="hdr-acoustic">
+      <h2 id="hdr-acoustic">Acoustic Envelope & Vessel Traffic Discipline</h2>
+      <p>Belugas live by sound. Sanctuary placement and operational windows must minimize acoustic stressors.</p>
+      <div class="grid cols-2">
+        <div>
+          <table id="acTable">
+            <thead><tr><th>Measure</th><th>Window</th><th>Owner</th><th>Done</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <button class="btn" onclick="addAcoustic()">Add Measure</button>
+        </div>
+        <div>
+          <svg id="acPlot" viewBox="0 0 600 220" style="width:100%; background:rgba(255,255,255,.03); border-radius:10px; border:1px solid rgba(255,255,255,.1)">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#7fe3c7"/><stop offset="1" stop-color="#3bb4ff"/></linearGradient>
+            </defs>
+            <text x="12" y="18" fill="#9fb7c6" font-size="12">Noise Model (proxy)</text>
+            <!-- axes -->
+            <line x1="40" y1="190" x2="580" y2="190" stroke="rgba(255,255,255,.25)" />
+            <line x1="40" y1="30"  x2="40"  y2="190" stroke="rgba(255,255,255,.25)" />
+          </svg>
+          <div class="small muted">Lower curve = better (quieter). Add measures (speed limits, buffer zones) to see proxy curve drop.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMMUNITY & STAKEHOLDERS -->
+    <section id="community" class="parallax" data-depth="0.015" aria-labelledby="hdr-community">
+      <h2 id="hdr-community">Community Consent & Stakeholder Readiness</h2>
+      <p>Relocations succeed when everyone knows their part. Log briefings, agreements, and feedback loops.</p>
+      <div class="grid cols-2">
+        <div>
+          <table id="comTable">
+            <thead><tr><th>Group</th><th>Contact</th><th>Briefed</th><th>MOU</th><th>Notes</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <button class="btn" onclick="addCommunity()">Add Stakeholder</button>
+        </div>
+        <div>
+          <div class="callout">
+            <b>Key groups:</b>
+            <ul class="small">
+              <li>Local Government (Burgeo Council)</li>
+              <li>Indigenous Partners (knowledge & stewardship)</li>
+              <li>Fishers & Maritime Operators</li>
+              <li>Emergency & Rescue Units</li>
+              <li>Citizen Shoreline Observers</li>
+            </ul>
+          </div>
+          <button class="btn" onclick="calcConsent()">Recalculate Consent Index</button>
+          <div id="consentOut" class="small muted" style="margin-top:6px">Consent Index: —</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RISK REGISTER & PREMORTEM -->
+    <section id="risk" class="parallax" data-depth="0.012" aria-labelledby="hdr-risk">
+      <h2 id="hdr-risk">Risk Register & Premortem</h2>
+      <p>We ask, “How could this fail?” then design it out. Each risk has probability, impact, mitigation, and owner.</p>
+      <table id="riskTable">
+        <thead><tr><th>Risk</th><th>Prob.</th><th>Impact</th><th>Mitigation</th><th>Owner</th><th>Status</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn" onclick="addRisk()">Add Risk</button>
+        <button class="btn" onclick="calcRisk()">Recalculate Risk Budget</button>
+        <span id="riskOut" class="pill">Risk Budget Used: —</span>
+      </div>
+    </section>
+
+    <!-- TIMELINE (GANTT-LITE) -->
+    <section id="gantt" class="parallax" data-depth="0.01" aria-labelledby="hdr-gantt">
+      <h2 id="hdr-gantt">Phase 1 Timeline (Gantt-Lite)</h2>
+      <p>Target windows are aspirational and must yield to welfare signals and weather. Drag sliders to adapt durations.</p>
+      <div class="grid cols-4 small" style="align-items:end">
+        <div>
+          <label>Site Surveys (days)<br/><input type="range" min="7" max="45" value="21" id="t1" oninput="drawGantt()"/></label>
+        </div>
+        <div>
+          <label>Permits & EIA (days)<br/><input type="range" min="30" max="180" value="90" id="t2" oninput="drawGantt()"/></label>
+        </div>
+        <div>
+          <label>Vet Baselines (days)<br/><input type="range" min="14" max="90" value="35" id="t3" oninput="drawGantt()"/></label>
+        </div>
+        <div>
+          <label>Biosecurity Setup (days)<br/><input type="range" min="10" max="60" value="28" id="t4" oninput="drawGantt()"/></label>
+        </div>
+      </div>
+      <svg id="ganttSVG" viewBox="0 0 900 220" style="width:100%; margin-top:10px; background:rgba(255,255,255,.03); border-radius:10px; border:1px solid rgba(255,255,255,.1)"></svg>
+      <div class="small muted">Any ASI spike or consent drop automatically pushes tasks to the right (hold-safe).</div>
+      <div style="margin-top:10px">
+        <a class="btn" href="phase2.html" title="Phase 2 — Capture & Transport">Proceed to Phase 2 (Capture & Transport)</a>
+        <a class="btn" href="index.html" title="Back to Part 1">Back to Part 1</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Collapsed TLK chat -->
+  <div class="chat-panel" id="chatPanel" aria-hidden="true">
+    <iframe src="https://tlk.io/burgeo-whale-plan" title="PRA TLK Chat (Burgeo)"></iframe>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()" aria-expanded="false" id="chatToggle">
+    <span>💬 Chat</span>
+  </button>
+
+  <footer class="small" style="max-width:1200px;margin:40px auto 80px auto;padding:0 18px;color:var(--muted)">
+    <p>© Planetary Restoration Archive — Burgeo Whale Relocation Blueprint. Part 2 of a multi-file series.</p>
+    <p class="muted">Online-first with local caching. Private, local data only (IndexedDB). Export features coming in Part 6 (Appendix & Tools).</p>
+  </footer>
+
+  <script>
+    /* ===============================
+       IndexedDB (local state)
+       =============================== */
+    const DB_NAME = 'PRA_BUR_GEO';
+    const DB_VER  = 2;
+    let db;
+
+    function openDB(){
+      return new Promise((resolve, reject)=>{
+        const req = indexedDB.open(DB_NAME, DB_VER);
+        req.onupgradeneeded = (e)=>{
+          const d = e.target.result;
+          if(!d.objectStoreNames.contains('sites')) d.createObjectStore('sites', {keyPath:'id'});
+          if(!d.objectStoreNames.contains('permits')) d.createObjectStore('permits', {keyPath:'id'});
+          if(!d.objectStoreNames.contains('vet')) d.createObjectStore('vet', {keyPath:'id'});
+          if(!d.objectStoreNames.contains('bio')) d.createObjectStore('bio', {keyPath:'id'});
+          if(!d.objectStoreNames.contains('bio_dev')) d.createObjectStore('bio_dev', {keyPath:'k'});
+          if(!d.objectStoreNames.contains('ac')) d.createObjectStore('ac', {keyPath:'id'});
+          if(!d.objectStoreNames.contains('community')) d.createObjectStore('community', {keyPath:'id'});
+          if(!d.objectStoreNames.contains('risk')) d.createObjectStore('risk', {keyPath:'id'});
+          if(!d.objectStoreNames.contains('timeline')) d.createObjectStore('timeline', {keyPath:'k'});
+        };
+        req.onsuccess = ()=>{ db=req.result; resolve(db); };
+        req.onerror   = ()=>reject(req.error);
+      });
+    }
+    async function put(store, obj){
+      const tx = db.transaction(store,'readwrite'); tx.objectStore(store).put(obj);
+      return new Promise((res,rej)=>{ tx.oncomplete=()=>res(true); tx.onerror=()=>rej(tx.error); });
+    }
+    async function del(store, key){
+      const tx = db.transaction(store,'readwrite'); tx.objectStore(store).delete(key);
+      return new Promise((res,rej)=>{ tx.oncomplete=()=>res(true); tx.onerror=()=>rej(tx.error); });
+    }
+    async function all(store){
+      const tx = db.transaction(store,'readonly'); const st=tx.objectStore(store);
+      const out=[]; const req=st.openCursor();
+      return new Promise((res,rej)=>{
+        req.onsuccess=()=>{ const c=req.result; if(c){ out.push(c.value); c.continue(); } else res(out); };
+        req.onerror=()=>rej(req.error);
+      });
+    }
+
+    /* ===============================
+       Site Matrix
+       =============================== */
+    const WEIGHTS = {thermal:.15, sal:.10, depth:.10, prey:.15, noise:.15, pred:.05, storm:.10, infra:.10, comm:.10};
+    const tbodySites = document.querySelector('#siteTable tbody');
+    const siteSummary = document.getElementById('siteSummary');
+
+    function rowInput(name, val=0.5){ return `<input type="number" min="0" max="1" step="0.01" value="${val}" data-k="${name}" style="width:64px;background:rgba(255,255,255,.06);color:var(--ink);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:4px 6px">`; }
+    async function addSite(){
+      await openDB();
+      const id = 'S_'+Math.random().toString(36).slice(2,7);
+      const obj = {id, name:'Unnamed Cove', thermal:.6, sal:.8, depth:.7, prey:.6, noise:.4, pred:.2, storm:.5, infra:.6, comm:.7};
+      await put('sites', obj);
+      renderSites();
+    }
+    async function removeSite(id){ await openDB(); await del('sites', id); renderSites(); }
+    async function renderSites(){
+      await openDB();
+      const rows = await all('sites');
+      tbodySites.innerHTML = rows.map(s=>{
+        return `<tr data-id="${s.id}">
+          <td contenteditable="true" oninput="updSite('${s.id}','name',this.textContent)">${s.name}</td>
+          <td>${rowInput('thermal',s.thermal)}</td>
+          <td>${rowInput('sal',s.sal)}</td>
+          <td>${rowInput('depth',s.depth)}</td>
+          <td>${rowInput('prey',s.prey)}</td>
+          <td>${rowInput('noise',s.noise)}</td>
+          <td>${rowInput('pred',s.pred)}</td>
+          <td>${rowInput('storm',s.storm)}</td>
+          <td>${rowInput('infra',s.infra)}</td>
+          <td>${rowInput('comm',s.comm)}</td>
+          <td class="small muted score">—</td>
+          <td><button class="btn" onclick="removeSite('${s.id}')">✖</button></td>
+        </tr>`;
+      }).join('') || `<tr><td colspan="12" class="muted small">No sites. Click “Add Candidate Site”.</td></tr>`;
+      tbodySites.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('change', e=>{
+          const tr = e.target.closest('tr'); const id = tr.getAttribute('data-id'); const k = e.target.getAttribute('data-k');
+          updSite(id,k, parseFloat(e.target.value||'0'));
+        });
+      });
+      calcSites();
+    }
+    async function updSite(id,k,v){
+      await openDB(); const rows = await all('sites'); const s = rows.find(x=>x.id===id); if(!s) return;
+      s[k]= (k==='name')? v : isNaN(v)? 0 : Math.max(0,Math.min(1,v));
+      await put('sites', s); calcSites();
+    }
+    async function calcSites(){
+      await openDB(); const rows = await all('sites');
+      let best = null, out = [];
+      rows.forEach(s=>{
+        const score =
+          s.thermal*WEIGHTS.thermal + s.sal*WEIGHTS.sal + s.depth*WEIGHTS.depth +
+          s.prey*WEIGHTS.prey + (1-s.noise)*WEIGHTS.noise + (1-s.pred)*WEIGHTS.pred +
+          (1-s.storm)*WEIGHTS.storm + s.infra*WEIGHTS.infra + s.comm*WEIGHTS.comm;
+        out.push({id:s.id, score});
+        if(!best || score>best.score) best={id:s.id,score,name:s.name};
+      });
+      tbodySites.querySelectorAll('tr').forEach(tr=>{
+        const id = tr.getAttribute('data-id'); const s = out.find(x=>x.id===id);
+        if(s){ tr.querySelector('.score').textContent = (s.score).toFixed(2); }
+      });
+      siteSummary.textContent = out.length ? `Top site: ${(best?.name||best?.id)} • Score ${(best.score).toFixed(2)} (weights applied).` : `No sites yet.`;
+      updateRings();
+    }
+
+    /* ===============================
+       Permits / Legal
+       =============================== */
+    const permBody = document.querySelector('#permTable tbody');
+    async function addPermit(){
+      await openDB();
+      const id = 'P_'+Math.random().toString(36).slice(2,7);
+      await put('permits',{id, name:'Instrument', owner:'—', due:'', status:'todo', file:null});
+      renderPermits();
+    }
+    async function removePermit(id){ await openDB(); await del('permits', id); renderPermits(); }
+    async function renderPermits(){
+      await openDB();
+      const rows = await all('permits');
+      permBody.innerHTML = rows.map(p=>`
+        <tr data-id="${p.id}">
+          <td contenteditable="true" oninput="updPermit('${p.id}','name',this.textContent)">${p.name}</td>
+          <td contenteditable="true" oninput="updPermit('${p.id}','owner',this.textContent)">${p.owner}</td>
+          <td><input type="date" value="${p.due||''}" onchange="updPermit('${p.id}','due',this.value)"/></td>
+          <td>
+            <select onchange="updPermit('${p.id}','status',this.value)">
+              <option ${p.status==='todo'?'selected':''}>todo</option>
+              <option ${p.status==='in_progress'?'selected':''}>in_progress</option>
+              <option ${p.status==='submitted'?'selected':''}>submitted</option>
+              <option ${p.status==='approved'?'selected':''}>approved</option>
+            </select>
+          </td>
+          <td>
+            <input type="file" onchange="attachPermit('${p.id}', this)"/>
+            <button class="btn" onclick="removePermit('${p.id}')">✖</button>
+          </td>
+        </tr>`).join('') || `<tr><td colspan="5" class="small muted">No legal items yet.</td></tr>`;
+      updateRings();
+    }
+    async function updPermit(id,k,v){
+      await openDB(); const rows = await all('permits'); const p = rows.find(x=>x.id===id); if(!p) return;
+      p[k]=v; await put('permits', p); updateRings();
+    }
+    async function attachPermit(id, input){
+      const file = input.files?.[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = async ()=>{
+        await openDB(); const rows = await all('permits'); const p = rows.find(x=>x.id===id); if(!p) return;
+        p.file = reader.result; await put('permits', p);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* ===============================
+       Vet Baselines
+       =============================== */
+    const vetBody = document.querySelector('#vetTable tbody');
+    async function saveVet(e){
+      e.preventDefault(); await openDB();
+      const fd = new FormData(e.target);
+      const id = (fd.get('id')||'').toString().trim(); if(!id) return alert('ID required');
+      const obj = {
+        id,
+        age: parseFloat(fd.get('age')||0),
+        sex: fd.get('sex')||'Unknown',
+        mass: parseFloat(fd.get('mass')||0),
+        bond: (fd.get('bond')||'').toString(),
+        notes:(fd.get('notes')||'').toString(),
+        asi:  parseFloat(fd.get('asi')||0.2),
+        panel: null
+      };
+      const file = e.target.panel.files?.[0];
+      if(file){
+        obj.panel = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); });
+      }
+      await put('vet', obj);
+      e.target.reset();
+      renderVet();
+    }
+    async function removeVet(id){ await openDB(); await del('vet', id); renderVet(); }
+    async function renderVet(){
+      await openDB(); const rows = await all('vet');
+      vetBody.innerHTML = rows.map(v=>`
+        <tr>
+          <td>${v.id}</td><td>${v.age}</td><td>${v.sex}</td><td>${v.mass}</td>
+          <td>${v.bond||'—'}</td><td>${v.asi.toFixed(2)}</td><td class="small">${v.notes||'—'}</td>
+          <td><button class="btn" onclick="removeVet('${v.id}')">✖</button></td>
+        </tr>`).join('') || `<tr><td colspan="8" class="small muted">No animals logged yet.</td></tr>`;
+      updateRings();
+    }
+
+    /* ===============================
+       Biosecurity
+       =============================== */
+    const bioBody = document.querySelector('#bioTable tbody');
+    async function addBio(){
+      await openDB();
+      const id = 'B_'+Math.random().toString(36).slice(2,7);
+      await put('bio',{id, step:'Define step', owner:'—', due:'', done:false});
+      renderBio();
+    }
+    async function toggleBio(id){
+      await openDB(); const rows = await all('bio'); const b = rows.find(x=>x.id===id); if(!b) return;
+      b.done = !b.done; await put('bio', b); renderBio();
+    }
+    async function removeBio(id){ await openDB(); await del('bio', id); renderBio(); }
+    async function updBio(id,k,v){
+      await openDB(); const rows = await all('bio'); const b = rows.find(x=>x.id===id); if(!b) return;
+      b[k]=v; await put('bio', b); updateRings();
+    }
+    async function renderBio(){
+      await openDB(); const rows = await all('bio');
+      bioBody.innerHTML = rows.map(b=>`
+        <tr data-id="${b.id}">
+          <td contenteditable="true" oninput="updBio('${b.id}','step',this.textContent)">${b.step}</td>
+          <td contenteditable="true" oninput="updBio('${b.id}','owner',this.textContent)">${b.owner}</td>
+          <td><input type="date" value="${b.due||''}" onchange="updBio('${b.id}','due',this.value)"/></td>
+          <td><input type="checkbox" ${b.done?'checked':''} onchange="toggleBio('${b.id}')"/></td>
+          <td><button class="btn" onclick="removeBio('${b.id}')">✖</button></td>
+        </tr>`).join('') || `<tr><td colspan="5" class="small muted">No biosecurity steps yet.</td></tr>`;
+      updateRings();
+    }
+    async function saveBioDeviation(){
+      await openDB();
+      await put('bio_dev',{k:'deviations', text:document.getElementById('bioDeviation').value, ts:Date.now()});
+      alert('Deviation log saved locally.');
+    }
+
+    /* ===============================
+       Acoustics
+       =============================== */
+    const acBody = document.querySelector('#acTable tbody');
+    async function addAcoustic(){
+      await openDB();
+      const id='A_'+Math.random().toString(36).slice(2,7);
+      await put('ac',{id, measure:'Speed ≤ 8 kn within 3 km', window:'All daylight', owner:'Harbor Master', done:false});
+      renderAcoustic();
+    }
+    async function toggleAc(id){
+      await openDB(); const rows = await all('ac'); const a = rows.find(x=>x.id===id); if(!a) return;
+      a.done = !a.done; await put('ac', a); renderAcoustic();
+    }
+    async function updAc(id,k,v){
+      await openDB(); const rows = await all('ac'); const a = rows.find(x=>x.id===id); if(!a) return;
+      a[k]=v; await put('ac', a); renderAcoustic();
+    }
+    async function removeAc(id){ await openDB(); await del('ac', id); renderAcoustic(); }
+    async function renderAcoustic(){
+      await openDB(); const rows = await all('ac');
+      acBody.innerHTML = rows.map(a=>`
+        <tr data-id="${a.id}">
+          <td contenteditable="true" oninput="updAc('${a.id}','measure',this.textContent)">${a.measure}</td>
+          <td contenteditable="true" oninput="updAc('${a.id}','window',this.textContent)">${a.window}</td>
+          <td contenteditable="true" oninput="updAc('${a.id}','owner',this.textContent)">${a.owner}</td>
+          <td><input type="checkbox" ${a.done?'checked':''} onchange="toggleAc('${a.id}')"/></td>
+          <td><button class="btn" onclick="removeAc('${a.id}')">✖</button></td>
+        </tr>`).join('') || `<tr><td colspan="5" class="small muted">No measures yet.</td></tr>`;
+      drawNoiseProxy();
+      updateRings();
+    }
+    function drawNoiseProxy(){
+      const svg = document.getElementById('acPlot');
+      // clear existing curve
+      svg.querySelectorAll('path.curve').forEach(n=>n.remove());
+      // proxy: fewer measures done -> higher noise
+      all('ac').then(rows=>{
+        const done = rows.filter(r=>r.done).length;
+        const total= Math.max(1, rows.length||1);
+        const q = 1 - (done/total); // 0 best, 1 worst
+        // draw a simple curve: y = 60*q + baseline wiggle
+        let d='M 40 180 ';
+        for(let x=40;x<=580;x+=10){
+          const t = (x-40)/540;
+          const y = 180 - (60*(1-q)*Math.sin(t*Math.PI)) - (20*(1-q));
+          d += `L ${x} ${y}`;
+        }
+        const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+        p.setAttribute('d', d);
+        p.setAttribute('fill','none');
+        p.setAttribute('stroke','url(#g1)');
+        p.setAttribute('stroke-width','2');
+        p.setAttribute('class','curve');
+        svg.appendChild(p);
+      });
+    }
+
+    /* ===============================
+       Community
+       =============================== */
+    const comBody = document.querySelector('#comTable tbody');
+    async function addCommunity(){
+      await openDB();
+      const id='C_'+Math.random().toString(36).slice(2,7);
+      await put('community',{id, group:'Group', contact:'—', briefed:false, mou:false, notes:''});
+      renderCommunity();
+    }
+    async function updCommunity(id,k,v){
+      await openDB(); const rows = await all('community'); const c = rows.find(x=>x.id===id); if(!c) return;
+      c[k]=v; await put('community', c); updateRings();
+    }
+    async function toggleCom(id, k){
+      await openDB(); const rows = await all('community'); const c = rows.find(x=>x.id===id); if(!c) return;
+      c[k] = !c[k]; await put('community', c); renderCommunity();
+    }
+    async function removeCommunity(id){ await openDB(); await del('community', id); renderCommunity(); }
+    async function renderCommunity(){
+      await openDB(); const rows = await all('community');
+      comBody.innerHTML = rows.map(c=>`
+        <tr data-id="${c.id}">
+          <td contenteditable="true" oninput="updCommunity('${c.id}','group',this.textContent)">${c.group}</td>
+          <td contenteditable="true" oninput="updCommunity('${c.id}','contact',this.textContent)">${c.contact}</td>
+          <td><input type="checkbox" ${c.briefed?'checked':''} onchange="toggleCom('${c.id}','briefed')"/></td>
+          <td><input type="checkbox" ${c.mou?'checked':''} onchange="toggleCom('${c.id}','mou')"/></td>
+          <td contenteditable="true" oninput="updCommunity('${c.id}','notes',this.textContent)">${c.notes||''}</td>
+          <td><button class="btn" onclick="removeCommunity('${c.id}')">✖</button></td>
+        </tr>`).join('') || `<tr><td colspan="6" class="small muted">No stakeholders yet.</td></tr>`;
+      updateRings();
+    }
+    async function calcConsent(){
+      await openDB(); const rows = await all('community');
+      const n = rows.length||1;
+      const brief = rows.filter(r=>r.briefed).length;
+      const mou   = rows.filter(r=>r.mou).length;
+      const idx = (0.6*(brief/n) + 0.4*(mou/n));
+      document.getElementById('consentOut').textContent = `Consent Index: ${idx.toFixed(2)} (briefings 60%, MOUs 40%)`;
+      document.getElementById('consentBar').style.width = Math.round(idx*100)+'%';
+      updateRings();
+    }
+
+    /* ===============================
+       Risk Register
+       =============================== */
+    const riskBody = document.querySelector('#riskTable tbody');
+    async function addRisk(){
+      await openDB();
+      const id='R_'+Math.random().toString(36).slice(2,7);
+      await put('risk',{id, name:'Risk description', p:0.2, i:0.4, mit:'Mitigation plan', owner:'—', status:'open'});
+      renderRisk();
+    }
+    async function updRisk(id,k,v){
+      await openDB(); const rows = await all('risk'); const r = rows.find(x=>x.id===id); if(!r) return;
+      r[k]= (k==='p' || k==='i') ? parseFloat(v||0) : v;
+      await put('risk', r); updateRings();
+    }
+    async function removeRisk(id){ await openDB(); await del('risk', id); renderRisk(); }
+    async function renderRisk(){
+      await openDB(); const rows = await all('risk');
+      riskBody.innerHTML = rows.map(r=>`
+        <tr data-id="${r.id}">
+          <td contenteditable="true" oninput="updRisk('${r.id}','name',this.textContent)">${r.name}</td>
+          <td><input type="number" min="0" max="1" step="0.01" value="${r.p}" onchange="updRisk('${r.id}','p',this.value)"/></td>
+          <td><input type="number" min="0" max="1" step="0.01" value="${r.i}" onchange="updRisk('${r.id}','i',this.value)"/></td>
+          <td contenteditable="true" oninput="updRisk('${r.id}','mit',this.textContent)">${r.mit}</td>
+          <td contenteditable="true" oninput="updRisk('${r.id}','owner',this.textContent)">${r.owner}</td>
+          <td>
+            <select onchange="updRisk('${r.id}','status',this.value)">
+              <option ${r.status==='open'?'selected':''}>open</option>
+              <option ${r.status==='mitigating'?'selected':''}>mitigating</option>
+              <option ${r.status==='closed'?'selected':''}>closed</option>
+            </select>
+          </td>
+          <td><button class="btn" onclick="removeRisk('${r.id}')">✖</button></td>
+        </tr>`).join('') || `<tr><td colspan="7" class="small muted">No risks documented. Run a premortem.</td></tr>`;
+      updateRings();
+    }
+    async function calcRisk(){
+      await openDB(); const rows = await all('risk');
+      const budgetUsed = rows.reduce((a,r)=> a + (r.p*r.i), 0);
+      document.getElementById('riskOut').textContent = `Risk Budget Used: ${budgetUsed.toFixed(2)} (Σ p×i)`;
+      document.getElementById('riskBar').style.width = Math.min(100, Math.round(budgetUsed*40))+'%';
+    }
+
+    /* ===============================
+       Gantt-Lite
+       =============================== */
+    function drawGantt(){
+      const svg = document.getElementById('ganttSVG');
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      const tasks = [
+        {name:'Site Surveys', days:+document.getElementById('t1').value, color:'#7fe3c7'},
+        {name:'Permits & EIA', days:+document.getElementById('t2').value, color:'#3bb4ff'},
+        {name:'Vet Baselines', days:+document.getElementById('t3').value, color:'#ffd36e'},
+        {name:'Biosecurity Setup', days:+document.getElementById('t4').value, color:'#d9f2ff'}
+      ];
+      const pxPerDay = 4; const x0=140, y0=40, rowH=32; const width=760;
+      // axes
+      const axis1 = line(120,30,120,190,'rgba(255,255,255,.25)');
+      const axis2 = line(120,190,870,190,'rgba(255,255,255,.25)');
+      svg.appendChild(axis1); svg.appendChild(axis2);
+      tasks.reduce((offset, t, idx)=>{
+        const y = y0 + idx*rowH;
+        const barW = t.days*pxPerDay;
+        svg.appendChild(text(20, y+18, t.name, '#9fb7c6', 12));
+        svg.appendChild(rect(x0+offset, y, barW, 20, t.color));
+        return offset + Math.round(t.days*0.25*pxPerDay); // small staggering
+      }, 0);
+      // grid markers
+      for(let d=0; d<=180; d+=30){
+        const x = x0 + d*pxPerDay;
+        svg.appendChild(line(x, 30, x, 190, 'rgba(255,255,255,.08)'));
+        svg.appendChild(text(x-8, 205, d+'d', '#9fb7c6', 10));
+      }
+      persistTimeline(tasks);
+    }
+    function rect(x,y,w,h,c){ const r = document.createElementNS("http://www.w3.org/2000/svg","rect"); r.setAttribute('x',x); r.setAttribute('y',y); r.setAttribute('width',w); r.setAttribute('height',h); r.setAttribute('rx',6); r.setAttribute('fill',c); return r; }
+    function line(x1,y1,x2,y2,c){ const l = document.createElementNS("http://www.w3.org/2000/svg","line"); l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2); l.setAttribute('stroke',c); return l; }
+    function text(x,y,t,c,sz){ const s = document.createElementNS("http://www.w3.org/2000/svg","text"); s.setAttribute('x',x); s.setAttribute('y',y); s.setAttribute('fill',c); s.setAttribute('font-size',sz); s.textContent=t; return s; }
+    async function persistTimeline(tasks){ await openDB(); await put('timeline',{k:'phase1', tasks, ts:Date.now()}); }
+
+    /* ===============================
+       HUD Rings Update
+       =============================== */
+    function setRing(id, val){ const deg = Math.round(val*360)+'deg'; const el = document.getElementById(id); el.style.setProperty('--deg', deg); el.setAttribute('data-label', `${el.getAttribute('data-label').split(' ')[0]} ${val.toFixed(2)}`); }
+    async function updateRings(){
+      await openDB();
+      // Legal ring: approvals share (submitted/approved heavier)
+      const perms = await all('permits');
+      const nP = perms.length||1;
+      const s = perms.filter(p=>p.status==='submitted').length;
+      const a = perms.filter(p=>p.status==='approved').length;
+      const legal = Math.min(1, 0.6*(a/nP) + 0.4*((s+a)/nP));
+      setRing('ringLegal', legal);
+
+      // Bio ring: % bio steps done
+      const bios = await all('bio'); const bDone = bios.filter(b=>b.done).length; const bio = (bios.length? bDone/bios.length : 0);
+      setRing('ringBio', bio);
+
+      // Comms ring: consent index proxy
+      const comm = await all('community'); const brief = comm.filter(c=>c.briefed).length; const mou = comm.filter(c=>c.mou).length;
+      const consentIdx = (comm.length? 0.6*(brief/comm.length) + 0.4*(mou/comm.length) : 0);
+      setRing('ringComms', consentIdx);
+
+      // Phase readiness ~ mean of rings (conservative)
+      const phase = (legal + bio + consentIdx)/3;
+      setRing('ringPhase', phase);
+    }
+
+    /* ===============================
+       TLK chat toggle (collapsed)
+       =============================== */
+    function toggleChat(){
+      const p = document.getElementById('chatPanel');
+      const t = document.getElementById('chatToggle');
+      const open = p.style.display === 'block';
+      p.style.display = open ? 'none' : 'block';
+      t.setAttribute('aria-expanded', String(!open));
+    }
+
+    /* ===============================
+       Service Worker (inline via Blob)
+       =============================== */
+    (function registerSW(){
+      if(!('serviceWorker' in navigator)) return;
+      const swCode = `
+        const CACHE='burgeo-part2-v1';
+        self.addEventListener('install', e=>{
+          e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', e=>{ e.waitUntil(self.clients.claim()); });
+        self.addEventListener('fetch', e=>{
+          const url = new URL(e.request.url);
+          if(url.origin===location.origin){
+            e.respondWith(caches.match(e.request).then(r=> r || fetch(e.request)));
+          }
+        });
+      `;
+      const blob = new Blob([swCode],{type:'text/javascript'});
+      const swURL = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swURL).catch(()=>{});
+    })();
+
+    /* ===============================
+       Parallax Starfield + Constellations
+       =============================== */
+    const starC = document.getElementById('starfield');
+    const consC = document.getElementById('constellations');
+    const nebC  = document.getElementById('nebula');
+    const DPR = Math.min(2, window.devicePixelRatio || 1);
+
+    function fit(c){
+      c.width = Math.floor(innerWidth * DPR);
+      c.height= Math.floor(innerHeight* DPR);
+      c.style.width = innerWidth + 'px';
+      c.style.height= innerHeight + 'px';
+      const ctx = c.getContext('2d'); ctx.setTransform(DPR,0,0,DPR,0,0);
+      return ctx;
+    }
+
+    let sctx = fit(starC), cctx = fit(consC), nctx = fit(nebC);
+    let stars = [], links=[];
+    function seed(){
+      const N = Math.floor(520 + Math.random()*220);
+      stars = [];
+      for(let i=0;i<N;i++){
+        stars.push({
+          x: Math.random()*innerWidth,
+          y: Math.random()*innerHeight,
+          z: Math.random()*1.0 + 0.2,
+          r: Math.random()*1.6+0.2,
+          tw: Math.random()*0.7+0.3
+        });
+      }
+      links=[];
+      for(let i=0;i<70;i++){
+        const a = stars[Math.floor(Math.random()*stars.length)];
+        const b = stars[Math.floor(Math.random()*stars.length)];
+        if(a && b && Math.hypot(a.x-b.x, a.y-b.y) < 190) links.push([a,b, Math.random()*0.6+0.2]);
+      }
+    }
+    seed();
+
+    function draw(){
+      // nebula
+      nctx.clearRect(0,0,innerWidth,innerHeight);
+      const grad = nctx.createRadialGradient(innerWidth*0.7, innerHeight*0.2, 60, innerWidth*0.7, innerHeight*0.2, Math.max(innerWidth,innerHeight)*0.9);
+      grad.addColorStop(0,'rgba(127,227,199,0.08)');
+      grad.addColorStop(1,'rgba(0,0,0,0)');
+      nctx.fillStyle = grad; nctx.fillRect(0,0,innerWidth,innerHeight);
+
+      // stars
+      sctx.clearRect(0,0,innerWidth,innerHeight);
+      for(const s of stars){
+        const flick = 0.6 + 0.4*Math.sin((Date.now()/1000)*s.tw + s.x);
+        sctx.globalAlpha = 0.7*flick;
+        sctx.beginPath();
+        sctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        sctx.fillStyle = '#d9f2ff';
+        sctx.fill();
+      }
+
+      // constellations
+      cctx.clearRect(0,0,innerWidth,innerHeight);
+      cctx.strokeStyle='rgba(127,227,199,.18)';
+      cctx.lineWidth=1;
+      links.forEach(([a,b,alpha])=>{
+        cctx.globalAlpha=alpha;
+        cctx.beginPath(); cctx.moveTo(a.x,a.y); cctx.lineTo(b.x,b.y); cctx.stroke();
+      });
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+
+    window.addEventListener('resize', ()=>{
+      sctx = fit(starC); cctx = fit(consC); nctx = fit(nebC);
+      seed();
+    });
+
+    /* Mouse parallax */
+    document.addEventListener('pointermove', (e)=>{
+      const dx = (e.clientX / innerWidth - .5);
+      const dy = (e.clientY / innerHeight- .5);
+      starC.style.transform = `translate(${dx*6}px, ${dy*6}px)`;
+      consC.style.transform = `translate(${dx*10}px, ${dy*10}px)`;
+      nebC.style.transform  = `translate(${dx*20}px, ${dy*20}px)`;
+    });
+
+    /* Section parallax */
+    document.querySelectorAll('.parallax').forEach(el=>{
+      const depth = parseFloat(el.getAttribute('data-depth')||'0.02');
+      window.addEventListener('scroll', ()=>{
+        const y = window.scrollY * depth;
+        el.style.transform = `translateY(${y}px)`;
+      },{passive:true});
+    });
+
+    /* Smooth nav */
+    function scrollToSection(id){
+      const el = document.getElementById(id);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    /* INIT */
+    (async()=>{
+      try{
+        await openDB();
+        renderSites(); renderPermits(); renderVet(); renderBio(); renderAcoustic(); renderCommunity(); renderRisk();
+        drawGantt(); drawNoiseProxy(); calcRisk(); calcConsent(); updateRings();
+      }catch(e){}
+    })();
+  </script>
+</body>
+</html>

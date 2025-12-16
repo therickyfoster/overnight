@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mycelial Safety Grid — Protective Access for Aid Workers</title>
+  <meta name="description" content="Standalone, offline‑friendly index.html with PRA-style visuals/animations to catalyze protective access and political pressure for aid‑worker safety."/>
+  <meta name="color-scheme" content="dark light">
+  <style>
+    :root{
+      --bg-0:#05060a; --bg-1:#0a0c14; --bg-2:#0e1220; --glass:rgba(255,255,255,.06);
+      --ink-0:#eaf2ff; --ink-1:#b8c7ff; --ink-d:#9fb1ff;
+      --pri:#8cffd3; --pri-2:#70f5ff; --acc:#c9a8ff; --hot:#ffb3b3; --safe:#9dff8c; --warn:#ffd36e;
+      --shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+      --radius:22px; --blur:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, Noto Color Emoji, Apple Color Emoji;
+      color:var(--ink-0); background: radial-gradient(1200px 700px at 70% -10%, #142034 0%, transparent 55%),
+                 radial-gradient(900px 600px at -10% 80%, #061224 0%, transparent 60%), var(--bg-0);
+      overflow-x:hidden;
+    }
+    /* Canvas background */
+    #bgCanvas{position:fixed; inset:0; z-index:-2; filter:contrast(110%) saturate(110%)}
+    .glow{position:fixed; inset:0; z-index:-1; pointer-events:none; mix-blend-mode:screen}
+    .glow::before,.glow::after{
+      content:""; position:absolute; border-radius:50%; filter:blur(90px); opacity:.22;
+    }
+    .glow::before{width:55vmax; height:55vmax; background:conic-gradient(from 210deg, var(--pri), transparent 40%, var(--acc), transparent 70%);
+      left:-10vmax; top:-10vmax}
+    .glow::after{width:60vmax; height:60vmax; background:radial-gradient(circle at 30% 30%, var(--pri-2), transparent 35%),
+                  radial-gradient(circle at 70% 60%, var(--acc), transparent 40%);
+      right:-20vmax; bottom:-20vmax}
+
+    /* Shell */
+    header{
+      position:sticky; top:0; z-index:10; backdrop-filter:saturate(120%) blur(8px);
+      background:linear-gradient(to bottom, rgba(8,12,20,.8), rgba(8,12,20,.25));
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 20px}
+    nav{display:flex; gap:14px; align-items:center; justify-content:space-between}
+    .brand{display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:.3px}
+    .brand .dot{width:10px; height:10px; border-radius:50%; background:var(--pri); box-shadow:0 0 16px var(--pri)}
+    .nav-actions{display:flex; gap:10px}
+    .btn{border:1px solid rgba(255,255,255,.12); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow:var(--shadow); color:var(--ink-0); padding:10px 14px; border-radius:14px; cursor:pointer; transition:transform .15s ease, border-color .2s ease;
+    }
+    .btn:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.24)}
+    .btn.primary{border-color:rgba(140,255,211,.35); background:linear-gradient(180deg, rgba(140,255,211,.15), rgba(140,255,211,.05));}
+
+    .hero{padding:80px 20px 30px}
+    .hero .wrap{display:grid; grid-template-columns: 1.15fr .85fr; gap:28px; align-items:center}
+    h1{font-size: clamp(28px, 3.4vw, 48px); line-height:1.05; margin:0 0 14px; letter-spacing:.2px}
+    .lead{font-size: clamp(15px, 1.1vw, 18px); color:var(--ink-d)}
+    .stamp{display:inline-flex; align-items:center; gap:10px; font-size:.9rem; opacity:.9; padding:8px 12px; border-radius:999px; background:rgba(140,255,211,.12); border:1px solid rgba(140,255,211,.35)}
+    .keyline{height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent); margin:30px 0}
+
+    /* Cards */
+    .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:16px}
+    .card{grid-column: span 6; background:var(--glass); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); position:relative; overflow:hidden}
+    .card.small{grid-column: span 4}
+    .card.wide{grid-column: span 8}
+    .card h3{margin:0 0 8px; font-size: clamp(18px, 1.6vw, 22px)}
+    .card p{margin:8px 0 0; color:var(--ink-d)}
+    .card .chip{display:inline-flex; align-items:center; gap:8px; font-size:.8rem; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04)}
+    .card .hot{border-color: rgba(255,179,179,.45); background: rgba(255,179,179,.12)}
+    .card .safe{border-color: rgba(157,255,140,.45); background: rgba(157,255,140,.12)}
+
+    /* Collapsibles */
+    details{border:1px solid rgba(255,255,255,.09); background:rgba(255,255,255,.04); border-radius:14px; padding:10px 12px}
+    summary{cursor:pointer; list-style:none; display:flex; align-items:center; gap:10px; font-weight:600}
+    summary::-webkit-details-marker{display:none}
+
+    /* Table-like pledge strip */
+    .pledges{display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:10px; font-size:.95rem}
+    .pledges .hdr{opacity:.7; text-transform:uppercase; letter-spacing:.08em; font-size:.8rem}
+    .row{display:contents}
+    .cell{padding:10px 12px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); border-radius:12px}
+
+    footer{padding:40px 20px; opacity:.8}
+    a{color:var(--pri)}
+
+    /* Motion */
+    .reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease}
+    .reveal.on{opacity:1; transform:none}
+
+    /* Chips toggle */
+    .toggle{display:inline-flex; gap:10px; align-items:center}
+    .toggle input{appearance:none; width:42px; height:24px; background:rgba(255,255,255,.14); border-radius:999px; position:relative; outline:none; cursor:pointer; transition:background .2s ease}
+    .toggle input:checked{background:rgba(140,255,211,.35)}
+    .toggle input::after{content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:white; transition:left .2s ease}
+    .toggle input:checked::after{left:21px}
+
+    .badge{display:inline-flex; gap:8px; align-items:center; font-size:.8rem; padding:6px 10px; border-radius:999px; border:1px dashed rgba(255,255,255,.18)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+
+    @media (max-width: 900px){
+      .hero .wrap{grid-template-columns:1fr}
+      .card,.card.small,.card.wide{grid-column: span 12}
+      .pledges{grid-template-columns: 1.4fr .9fr .9fr .9fr}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+  <div class="glow" aria-hidden="true"></div>
+
+  <header>
+    <div class="wrap">
+      <nav>
+        <div class="brand"><span class="dot" aria-hidden="true"></span> Mycelial Safety Grid <span class="badge">zero‑harm • transparency • sovereignty</span></div>
+        <div class="nav-actions">
+          <button class="btn" id="exportPlan" title="Export selected actions as JSON">Export Plan</button>
+          <button class="btn primary" id="focusMode" title="Dim UI chrome for focused facilitation">Focus</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="stamp">🧬 Prenarrative inversion: extraction harms compound; protection compounding benefits.</span>
+        <h1>Protective Access for Aid Workers = Access to Humanity</h1>
+        <p class="lead">Public figures sounding the alarm are a proxy signal: <b>make access safe, verifiable, and non‑negotiable</b>. This page offers a <i>mycelial</i> set of solutions—distributed, redundant, and mutually reinforcing—so safety becomes the obvious default.</p>
+        <div class="keyline"></div>
+        <div class="toggle"><label class="mono">Live Ops Mode</label><input id="opsMode" type="checkbox"/></div>
+      </div>
+      <div>
+        <details class="reveal on">
+          <summary>📣 Signal context (public alarm → policy pressure)</summary>
+          <p style="margin-top:8px">Signals from respected public figures and institutions function as <em>non‑technical escalation beacons</em>—inviting governments to open protected corridors, enforce deconfliction, and fund access at pace. Treat them as triggers for immediate, auditable action rather than commentary. 
+          
+          <br><br><span class="mono">Source slot:</span> Include statements and briefings calling for aid‑worker safety and humanitarian access.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="grid">
+
+      <article class="card wide reveal" data-node="protected-corridors">
+        <div class="chip hot">🚧 Protected Access Corridors</div>
+        <h3>Deconflicted humanitarian lanes with cryptographic attestations</h3>
+        <p>
+          Establish <b>time‑bounded humanitarian windows</b> and <b>GPS‑bounded corridors</b> co‑signed by all militaries in range. 
+          Embed <span class="mono">signed corridor manifests</span> and a <b>neutral verifier</b> that publishes <i>append‑only</i> status beacons (hashes only) to a public mirror for tamper‑evidence. Violations become <i>self‑reporting</i> reputational debt.
+        </p>
+        <details style="margin-top:10px"><summary>How it compounds safety ⤵</summary>
+          <p>Like mycelium, routes branch; if one corridor fails, traffic reroutes via pre‑negotiated alternates. Mirror beacons create redundancy; secrecy is obsolete because <em>metadata of protection</em> is public, while sensitive specifics remain sovereign.</p>
+        </details>
+      </article>
+
+      <article class="card small reveal" data-node="aid-telemetry">
+        <div class="chip safe">📡 Safety Telemetry</div>
+        <h3>Blue‑dot kit for teams</h3>
+        <p>Offline‑first check‑in app pattern: <b>5‑minute deadman timer</b>, silent duress signal, and 
+          <span class="mono">W3C Geolocation + WebCrypto</span> sealed pings to a multi‑mirror custodian set (NGO+UN+ICRC). 
+          Missed pings elevate corridor status → automatic pause/notify.</p>
+      </article>
+
+      <article class="card small reveal" data-node="deconfliction">
+        <div class="chip hot">🛰️ Deconfliction Autopilot</div>
+        <h3>Machine‑readable No‑Strike map</h3>
+        <p>Publish a <span class="mono">signed GeoJSON</span> of hospitals, warehouses, convoy paths. Clients cache locally; changes stream as <span class="mono">Merkle diffs</span>. Military subscribers attest consumption to prove notice.</p>
+      </article>
+
+      <article class="card small reveal" data-node="funding">
+        <div class="chip">💸 Frictionless Funding</div>
+        <h3>Access > money; but money unlocks access</h3>
+        <p>Standing <b>Flash Appeal</b> wallet set (multi‑sig; fiat on‑ramps mirrored). All txs memo‑tagged to corridor IDs. Delays = exponential harm; 
+          fast routes get <b>priority corridors</b> in the next window.</p>
+      </article>
+
+      <article class="card small reveal" data-node="comms">
+        <div class="chip">🔐 SafeComm Kits</div>
+        <h3>Low‑bandwidth, deniable comms</h3>
+        <p>Pre‑shared one‑time pads for 
+          <span class="mono">short task codes</span>; QR‑based rotation every shift; no PII in clear. If a node is seized, blast radius stays tiny.</p>
+      </article>
+
+      <article class="card small reveal" data-node="duty">
+        <div class="chip">📜 Duty‑of‑Care Contracts</div>
+        <h3>Enforced minimums, not vibes</h3>
+        <p>Each employer signs <b>baseline protections</b>: rest windows, extraction thresholds, independent hotline, and 
+          <span class="mono">incident escrow</span> that pays out upon verified breach.</p>
+      </article>
+
+      <article class="card wide reveal" data-node="matrix">
+        <div class="chip safe">🧪 Mycelial Solutions Matrix</div>
+        <h3>Pick‑and‑chain mitigations (redundant by design)</h3>
+        <p>Toggle to compose a locally‑valid plan; export as JSON and share for attestation.</p>
+        <div class="keyline"></div>
+        <div class="grid" id="matrix">
+          <!-- matrix items generated by JS -->
+        </div>
+      </article>
+
+      <article class="card wide reveal" data-node="pledges">
+        <div class="chip">🤝 Public Pledges (mirror logic)</div>
+        <h3>Everyone who touches the corridor leaves a fingerprint</h3>
+        <div class="pledges" aria-label="pledge table">
+          <div class="cell hdr">Actor</div>
+          <div class="cell hdr">What</div>
+          <div class="cell hdr">How Verified</div>
+          <div class="cell hdr">Mirror</div>
+          <div class="row">
+            <div class="cell">Government(s)</div>
+            <div class="cell">Open windows + enforce deconfliction</div>
+            <div class="cell">Signed orders • incident stats ↓</div>
+            <div class="cell">Public hash log</div>
+          </div>
+          <div class="row">
+            <div class="cell">Military</div>
+            <div class="cell">Subscribe to No‑Strike GeoJSON</div>
+            <div class="cell">Receipt attest • playback audit</div>
+            <div class="cell">Mirror receipts</div>
+          </div>
+          <div class="row">
+            <div class="cell">NGOs</div>
+            <div class="cell">Equip teams with Blue‑dot kit</div>
+            <div class="cell">Heartbeat uptime • response time</div>
+            <div class="cell">Redundant custodian set</div>
+          </div>
+          <div class="row">
+            <div class="cell">Media</div>
+            <div class="cell">Context: windows ≠ politics</div>
+            <div class="cell">Corrections ledger</div>
+            <div class="cell">Mirror brief</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card reveal" data-node="ethos">
+        <div class="chip">🧠 Extrasuperficial Reframe</div>
+        <h3>Obsolete OS: secrecy & delay → Living upgrade: transparency & care</h3>
+        <p>Every hour without corridor access compounds harm like interest on a toxic loan. Flip it: protection compounds trust, access, and survival. Mycelium’s trick is not strength but <i>networked redundancy</i>. We copy that.</p>
+      </article>
+
+      <article class="card reveal" data-node="toolkit">
+        <div class="chip">🧰 Facilitator Toolkit</div>
+        <h3>Run‑sheet (field‑ready)</h3>
+        <ul>
+          <li>Confirm corridor window + alternates; publish signed manifest hash.</li>
+          <li>Distribute Blue‑dot kits; verify deadman + duress channels.</li>
+          <li>Sync No‑Strike GeoJSON; record subscriber receipts.</li>
+          <li>Fund the Flash‑Appeal multi‑sig; memo every tx with corridor ID.</li>
+          <li>Publish mirror beacons every 15 minutes; auto‑pause on breach.</li>
+        </ul>
+      </article>
+
+    </div>
+  </main>
+
+  <footer class="wrap">
+    <div class="keyline"></div>
+    <div class="reveal on">
+      <div class="badge">🕊️ Zero‑harm override • 🪪 Sovereignty • 🔍 Verifiability</div>
+      <p style="margin-top:10px; color:var(--ink-d)">This standalone file uses PRA‑style visuals and mycelial logic. Save and share freely. To extend, open the file and modify the <span class="mono">MATRIX</span> in the script. No external assets required. ✨</p>
+    </div>
+  </footer>
+
+  <script>
+  // --- Animated mycelial background (hyphae + stars) ---
+  const cvs = document.getElementById('bgCanvas');
+  const ctx = cvs.getContext('2d');
+  let W,H, DPR = Math.min(devicePixelRatio||1, 2);
+  const N = 120, links = 4, pts = [];
+  const rand = (a,b)=>a+Math.random()*(b-a);
+  function resize(){
+    W = cvs.width = innerWidth * DPR; H = cvs.height = innerHeight * DPR; cvs.style.width=innerWidth+'px'; cvs.style.height=innerHeight+'px';
+  }
+  addEventListener('resize', resize, {passive:true}); resize();
+  for(let i=0;i<N;i++) pts.push({x:rand(0,W), y:rand(0,H), vx:rand(-.15,.15), vy:rand(-.15,.15), r: rand(0.6, 1.8)*DPR});
+  function tick(t){
+    ctx.clearRect(0,0,W,H);
+    // stars
+    ctx.fillStyle='rgba(255,255,255,.7)';
+    for(const p of pts){
+      p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W) p.vx*=-1; if(p.y<0||p.y>H) p.vy*=-1;
+      ctx.globalAlpha = 0.7; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    }
+    // hyphae
+    for(let i=0;i<N;i++){
+      for(let k=1;k<=links;k++){
+        const j = (i+k)%N; const a=pts[i], b=pts[j];
+        const dx=a.x-b.x, dy=a.y-b.y; const d=Math.hypot(dx,dy);
+        if(d<150*DPR){
+          ctx.globalAlpha = 0.08 * (1 - d/(150*DPR));
+          const grd = ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+          grd.addColorStop(0, 'rgba(140,255,211,1)');
+          grd.addColorStop(1, 'rgba(201,168,255,1)');
+          ctx.strokeStyle = grd; ctx.lineWidth = 1.1; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // --- Reveal on scroll ---
+  const io = new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('on')), {threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // --- Solutions matrix generator ---
+  const ITEMS = [
+    {id:'corridor-alt',     title:'Alternate Corridors', emoji:'🌿', desc:'Pre‑negotiated alternates auto‑activate on breach.'},
+    {id:'window-timing',    title:'Window Cadence',      emoji:'🕰️', desc:'Predictable daily windows lower chaos + risk.'},
+    {id:'custodian-set',    title:'Mirror Custodians',   emoji:'🪞', desc:'NGO+UN+ICRC+Local rotate beacon custody.'},
+    {id:'blue-dot',         title:'Blue‑dot Kit',        emoji:'🔵', desc:'Heartbeat + duress signals with offline cache.'},
+    {id:'duress-code',      title:'Duress Codes',        emoji:'🧩', desc:'Short codes that signal danger without escalation.'},
+    {id:'no-strike',        title:'No‑Strike GeoJSON',   emoji:'🛰️', desc:'Signed map; subscribers attest consumption.'},
+    {id:'flash-fund',       title:'Flash Appeal',        emoji:'⚡', desc:'Multi‑sig wallet; memo funds to corridor IDs.'},
+    {id:'pseudonymity',     title:'Pseudonym Teams',     emoji:'🎭', desc:'Reduce kidnap value; rotate call‑signs.'},
+    {id:'hotline',          title:'Independent Hotline', emoji:'☎️', desc:'Third‑party escalation without retaliation.'},
+    {id:'pause-rule',       title:'Auto‑Pause Rule',     emoji:'⏸️', desc:'Missed pings → corridor pause & notify.'},
+    {id:'duty-escrow',      title:'Duty Escrow',         emoji:'💼', desc:'Funds release on verified breach.'},
+    {id:'proof-mirror',     title:'Proof Mirror',        emoji:'🧾', desc:'Append‑only hashes to public mirror.'}
+  ];
+  const matrixEl = document.getElementById('matrix');
+  function renderMatrix(){
+    matrixEl.innerHTML = ITEMS.map(item=>`
+      <label class="card small" style="cursor:pointer" data-id="${item.id}">
+        <div class="chip"><span style="font-size:1.1rem">${item.emoji}</span> ${item.title}</div>
+        <p>${item.desc}</p>
+        <input type="checkbox" style="position:absolute; inset:10px; opacity:0;" aria-label="Select ${item.title}" />
+      </label>
+    `).join('');
+  }
+  renderMatrix();
+
+  // Collect selections
+  function selections(){
+    return Array.from(matrixEl.querySelectorAll('label')).filter(l=>l.querySelector('input').checked).map(l=>l.dataset.id);
+  }
+
+  // Export
+  document.getElementById('exportPlan').addEventListener('click',()=>{
+    const plan = {
+      meta:{generatedAt:new Date().toISOString(), rationale:'Aid‑worker safety via mycelial redundancy and public mirror attestations.'},
+      opsMode: document.getElementById('opsMode').checked,
+      selections: selections()
+    };
+    const blob = new Blob([JSON.stringify(plan,null,2)], {type:'application/json'});
+    const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'mycelial_safety_plan.json'});
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+
+  // Focus Mode
+  const focusBtn = document.getElementById('focusMode');
+  let focus=false; focusBtn.addEventListener('click',()=>{
+    focus=!focus; document.body.style.setProperty('transition','filter .25s ease');
+    document.body.style.filter = focus? 'saturate(.95) brightness(.9)' : 'none';
+    focusBtn.textContent = focus? 'Unfocus' : 'Focus';
+  });
+
+  // Click ripple micro‑interaction
+  addEventListener('click', (e)=>{
+    const r=document.createElement('span'); r.style.cssText=`position:fixed; left:${e.clientX-6}px; top:${e.clientY-6}px; width:12px; height:12px; border-radius:50%; background:radial-gradient(circle, rgba(140,255,211,.8), transparent 60%); pointer-events:none; mix-blend-mode:screen; opacity:.9; transition: transform .6s ease, opacity .6s ease; transform:scale(1)`; document.body.appendChild(r); requestAnimationFrame(()=>{r.style.transform='scale(16)'; r.style.opacity='0'}); setTimeout(()=>r.remove(),650);
+  }, {passive:true});
+  </script>
+</body>
+</html>

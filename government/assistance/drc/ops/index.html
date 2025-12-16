@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ops Micro‑Grant + Gear Mycelium — Peace‑Safe Acceleration</title>
+  <meta name="description" content="Standalone, offline‑friendly index.html: parallax constellations, animated starfield, and an interactive mycelium web to plan a week‑4–6 ops micro‑grant and gear kit for WHO‑linked partners without destabilization." />
+  <style>
+    :root{
+      --bg0:#060814; --bg1:#0d1024; --bg2:#0b0f1e; --ink:#e6f3ff; --muted:#92a3c4; --accent:#7ae2ff; --accent2:#caa7ff; --ok:#37d399; --warn:#ffd166; --bad:#ff5d73; --glass:rgba(255,255,255,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;color:var(--ink);background:radial-gradient(1200px 800px at 20% 10%,#111631 20%,transparent 60%),radial-gradient(1000px 600px at 80% 20%,#0b1230 10%,transparent 60%),linear-gradient(180deg,var(--bg1),var(--bg2));overflow-x:hidden}
+
+    /* Starfield canvas backdrop */
+    #stars{position:fixed;inset:0;z-index:-3;display:block}
+
+    /* Parallax constellations (SVG layers) */
+    .parallax{position:fixed;inset:0;pointer-events:none;z-index:-2}
+    .layer{position:absolute;inset:0;opacity:.35;filter:drop-shadow(0 0 6px rgba(122,226,255,.25))}
+
+    /* Glass cards */
+    .wrap{max-width:1100px;margin:clamp(12px,3vh,32px) auto;padding:clamp(8px,1.2vw,16px)}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+    .card{grid-column:span 12;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px 18px 20px;backdrop-filter:blur(8px);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+    .card h2,.card h3{margin:.2rem 0 .6rem 0;font-weight:700;letter-spacing:.2px}
+    .card h2{font-size:clamp(20px,2.6vw,28px)}
+    .card h3{font-size:clamp(16px,2vw,20px);color:var(--muted)}
+    .row{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--glass);border:1px solid rgba(255,255,255,.12)}
+    .accent{color:var(--accent)}
+    .muted{color:var(--muted)}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.18);background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.06));padding:10px 14px;border-radius:12px;color:var(--ink);cursor:pointer;transition:.2s transform, .2s filter;backdrop-filter:blur(6px)}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+
+    /* Mycelium graph */
+    #graph{width:100%;height:440px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px dashed rgba(255,255,255,.12)}
+    .hint{font-size:.9rem;color:var(--muted)}
+
+    /* Gear list table */
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+    th{text-align:left;color:var(--muted);font-weight:600}
+    td input[type="number"], td input[type="text"]{width:100%;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--ink)}
+    .money{font-variant-numeric:tabular-nums}
+
+    /* Timeline */
+    .timeline{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+    .tick{padding:10px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,.12);text-align:center}
+    .tick.active{outline:2px solid var(--accent)}
+
+    /* Footer */
+    .footer{opacity:.75}
+    .kicker{font-size:.95rem}
+
+    @media(min-width:880px){
+      .span-6{grid-column:span 6}
+      .span-4{grid-column:span 4}
+      .span-8{grid-column:span 8}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <!-- Minimal constellation strokes for parallax depth -->
+  <div class="parallax" aria-hidden="true">
+    <svg class="layer" id="lyr1" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <g fill="none" stroke="url(#g1)" stroke-width="1.4" stroke-linecap="round" stroke-opacity="0.8">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7ae2ff"/>
+            <stop offset="100%" stop-color="#caa7ff"/>
+          </linearGradient>
+        </defs>
+        <path d="M80 90 L220 140 L380 120 L540 200 L760 140 L940 220 L1120 180"/>
+        <path d="M100 520 L280 480 L420 560 L620 520 L800 600 L980 560"/>
+        <circle cx="220" cy="140" r="2.2"/><circle cx="540" cy="200" r="2.2"/><circle cx="940" cy="220" r="2.2"/>
+      </g>
+    </svg>
+    <svg class="layer" id="lyr2" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <g fill="none" stroke="#6ac7fa" stroke-opacity=".45">
+        <path d="M60 300 Q300 250 520 340 T1140 340"/>
+        <path d="M140 680 Q420 660 680 740 T1140 720"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2>Ops Micro‑Grant + Gear Mycelium <span class="accent">(week 4–6 curve‑bender)</span></h2>
+        <p class="kicker">Zero‑harm logistics, peace‑safe by design. This tool helps you compose a small, rapid operational grant and a field‑ready gear kit (portable diagnostics, cold‑chain support, PPE) for vetted, WHO‑linked partners—without destabilization. You control quantities, vendors, and sign‑off. Your plan is <strong>local‑law compliant</strong> and <strong>partner‑led</strong> by default.</p>
+        <div class="row" role="list">
+          <div class="pill" role="listitem">Prenarrative inversion: tiny funds now avert outsized harm later</div>
+          <div class="pill" role="listitem">Regenerative ops: transparency ≫ secrecy</div>
+          <div class="pill" role="listitem">Peace‑first routing: neutral implementers, auditable disbursements</div>
+        </div>
+      </section>
+
+      <!-- MYCELIUM GRAPH -->
+      <section class="card span-8">
+        <h3>Mycelium of Actions</h3>
+        <p class="hint">Drag nodes. Toggle steps complete. Export your micro‑grant plan as JSON. This is a <em>planning aid</em> to coordinate with your WHO‑linked partner’s protocols.</p>
+        <canvas id="graph"></canvas>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="resetGraph">Reset layout</button>
+          <button class="btn" id="exportPlan">Export plan (JSON)</button>
+          <button class="btn" id="printBrief">Print one‑pager</button>
+        </div>
+      </section>
+
+      <!-- TIMELINE -->
+      <section class="card span-4">
+        <h3>Operational timeline focus</h3>
+        <div class="timeline" id="timeline"></div>
+        <p class="hint">Week 4–6: bridge support for diagnostics, cold‑chain, PPE, transport & fuel—often the make‑or‑break for containment and care continuity.</p>
+      </section>
+
+      <!-- GEAR LIST -->
+      <section class="card span-8">
+        <h3>Gear & Consumables Builder</h3>
+        <p class="hint">Edit quantities and unit estimates. Numbers are placeholders—confirm with your partner’s logistics lead and procurement rules. Keep cold‑chain + PPE prioritized.</p>
+        <table id="gearTbl" aria-label="Gear list table">
+          <thead>
+            <tr><th>Item</th><th>Qty</th><th class="money">Unit est. ($)</th><th class="money">Line est. ($)</th></tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr><th colspan="3" style="text-align:right">Subtotal</th><th class="money" id="subtotal">$0</th></tr>
+            <tr><th colspan="3" style="text-align:right">Contingency (10%)</th><th class="money" id="cont">$0</th></tr>
+            <tr><th colspan="3" style="text-align:right">Estimated total</th><th class="money" id="grand">$0</th></tr>
+          </tfoot>
+        </table>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="addItem">Add custom item</button>
+          <button class="btn" id="saveGear">Save kit</button>
+          <span class="hint" id="saveStatus" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <!-- ROUTING & SAFETY -->
+      <section class="card span-4">
+        <h3>Peace‑Safe Routing</h3>
+        <ul>
+          <li><strong>Implementers:</strong> route through neutral, WHO‑coordinated or vetted partners with transparent ledgers.</li>
+          <li><strong>Do‑no‑harm filter:</strong> partner‑driven needs, local approvals, publish non‑sensitive receipts.</li>
+          <li><strong>Fuel & access:</strong> stipulate safe passage/deconfliction from authorities; no funding to armed actors.</li>
+          <li><strong>Data care:</strong> never collect patient‑identifiable data in this tool.</li>
+        </ul>
+        <div class="row">
+          <button class="btn" id="makeMoU">Draft MoU snippet</button>
+          <button class="btn" id="copyBrief">Copy partner brief</button>
+        </div>
+      </section>
+
+      <!-- REFERENCES / CONTEXT -->
+      <section class="card">
+        <h3>Context & references</h3>
+        <p class="hint">Use this plan alongside partner SOPs. Diagnostics & cold‑chain gaps often surface in weeks 4–6 of an outbreak or protracted crisis. Cite current WHO/OCHA materials publicly; keep sensitive ops details private.</p>
+        <details>
+          <summary>Why week 4–6 matters</summary>
+          <p>After initial surge, supply friction and fatigue appear: cartridges, transport fuel, ice packs, PPE, oxygen & power backup. Small grants targeted at these bottlenecks can preserve momentum and bend the curve.</p>
+        </details>
+        <details>
+          <summary>How to avoid destabilization</summary>
+          <ul>
+            <li>Follow host government and WHO partner coordination cells.</li>
+            <li>Keep funds small, transparent, and tightly scoped to health logistics.</li>
+            <li>Publicly acknowledge <em>only</em> non‑sensitive, aggregate support;</li>
+            <li>Audit trail: store approvals, POs, and photos of delivered supplies (no patients).</li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="card footer">
+        <div class="row"><span class="pill">Offline‑friendly</span><span class="pill">Local‑only storage</span><span class="pill">Printable brief</span><span class="pill">Zero‑harm by design</span></div>
+        <p class="muted">This file is a planning interface, not medical guidance. Always defer to WHO/Ministry SOPs and your partner’s clinical protocols.</p>
+      </section>
+    </div>
+  </div>
+
+  <script>
+  /* --- Animated starfield --- */
+  (function(){
+    const c=document.getElementById('stars');
+    const d=c.getContext('2d');
+    let w=innerWidth,h=innerHeight; c.width=w; c.height=h;
+    const N=Math.min(450, Math.floor(w*h/5000));
+    const stars=Array.from({length:N},()=>({x:Math.random()*w,y:Math.random()*h,z:Math.random()*1.2+.2,v:(Math.random()*0.2+0.05)}));
+    function tick(){
+      d.clearRect(0,0,w,h);
+      for(const s of stars){
+        s.x+=s.v; if(s.x>w+2){s.x=-2; s.y=Math.random()*h}
+        const size=s.z*1.4;
+        d.globalAlpha=s.z*.9; d.fillStyle='#cbe8ff'; d.fillRect(s.x,s.y,size,size);
+      }
+      requestAnimationFrame(tick);
+    }
+    addEventListener('resize',()=>{w=innerWidth;h=innerHeight;c.width=w;c.height=h});
+    tick();
+  })();
+
+  /* --- Parallax wobble --- */
+  (function(){
+    const l1=document.getElementById('lyr1'), l2=document.getElementById('lyr2');
+    addEventListener('mousemove',e=>{
+      const x=(e.clientX/innerWidth - .5), y=(e.clientY/innerHeight - .5);
+      l1.style.transform=`translate(${x*-15}px, ${y*-10}px)`;
+      l2.style.transform=`translate(${x*12}px, ${y*8}px)`;
+    });
+  })();
+
+  /* --- Timeline ticks --- */
+  const tl=document.getElementById('timeline');
+  const weeks=[0,1,2,3,4,5,6,7,8];
+  weeks.forEach(w=>{
+    const el=document.createElement('div'); el.className='tick'; el.textContent=`W${w}`; el.dataset.w=w;
+    if(w>=4 && w<=6) el.classList.add('active');
+    el.onclick=()=>{document.querySelectorAll('.tick').forEach(t=>t.classList.remove('active')); el.classList.add('active'); focusWeek(parseInt(el.dataset.w,10));}
+    tl.appendChild(el);
+  });
+  function focusWeek(w){
+    const hint=document.querySelector('.hint');
+    if(!hint) return;
+    const map={4:'Bridge diagnostic & cold‑chain gaps; protect staff with PPE; keep fuel flowing.',5:'Re‑stock cartridges/consumables; verify temperature logs; refresh safety briefings.',6:'Lock in access guarantees; rotate tired staff; document deliveries & lessons.'};
+    hint.textContent=map[w]||'Early surge (0–3): coordinate, map needs, avoid duplication. Late (7–8): handover & audit.';
+  }
+
+  /* --- Gear Builder --- */
+  const defaults=[
+    {name:'Portable diagnostic cartridges (e.g., Xpress/Xpert‑type)*', qty:120, unit:22},
+    {name:'Sample kits & safe packaging (swabs/tubes per SOP)*', qty:300, unit:3.5},
+    {name:'Cold‑chain: cooler + ice packs + temp loggers', qty:8, unit:95},
+    {name:'PPE bundles (respirator, gloves, gowns, eye protection)', qty:50, unit:18},
+    {name:'Power/fuel micro‑fund (generator/transport top‑up)', qty:1, unit:1200},
+    {name:'Oxygen concentrator loan / maintenance buffer', qty:1, unit:650},
+    {name:'Last‑mile data/comm (SIMs/airtime for coordination)', qty:10, unit:6},
+  ];
+  const T=document.querySelector('#gearTbl tbody');
+  function row(item){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="text" value="${item.name}"></td>
+      <td><input type="number" min="0" value="${item.qty}"></td>
+      <td class="money"><input type="number" step="0.01" min="0" value="${item.unit}"></td>
+      <td class="money line">$0</td>`;
+    T.appendChild(tr);
+    recalc();
+  }
+  function recalc(){
+    let subtotal=0; [...T.querySelectorAll('tr')].forEach(tr=>{
+      const [name,qty,unit]=tr.querySelectorAll('input');
+      const line=(parseFloat(qty.value||0)*parseFloat(unit.value||0));
+      tr.querySelector('.line').textContent='$'+line.toFixed(2);
+      subtotal+=line;
+    });
+    document.getElementById('subtotal').textContent='$'+subtotal.toFixed(2);
+    const cont=subtotal*0.10; document.getElementById('cont').textContent='$'+cont.toFixed(2);
+    document.getElementById('grand').textContent='$'+(subtotal+cont).toFixed(2);
+  }
+  defaults.forEach(row);
+  T.addEventListener('input',recalc);
+  document.getElementById('addItem').onclick=()=>row({name:'Custom item', qty:1, unit:0});
+  document.getElementById('saveGear').onclick=()=>{
+    const items=[...T.querySelectorAll('tr')].map(tr=>{const [n,q,u]=tr.querySelectorAll('input'); return {name:n.value, qty:+q.value, unit:+u.value};});
+    localStorage.setItem('gearKit', JSON.stringify(items));
+    document.getElementById('saveStatus').textContent='Saved locally ✓'; setTimeout(()=>document.getElementById('saveStatus').textContent='',1750);
+  }
+  // Load saved
+  const saved=localStorage.getItem('gearKit'); if(saved){T.innerHTML=''; JSON.parse(saved).forEach(row)}
+
+  /* --- Mycelium Graph (lightweight force layout) --- */
+  const cvs=document.getElementById('graph'); const ctx=cvs.getContext('2d');
+  function size(){cvs.width=cvs.clientWidth; cvs.height=440} size(); addEventListener('resize',size);
+  const nodes=[
+    {id:'Partner vetting', group:0, done:false},
+    {id:'Define micro‑grant scope', group:0, done:false},
+    {id:'Diagnostics cartridges', group:1, done:false},
+    {id:'Cold‑chain kit', group:1, done:false},
+    {id:'PPE bundles', group:1, done:false},
+    {id:'Fuel & transport', group:2, done:false},
+    {id:'Access/Deconfliction letter', group:2, done:false},
+    {id:'One‑pager brief', group:3, done:false},
+    {id:'Approvals & audit trail', group:3, done:false},
+  ];
+  const links=[
+    {s:0,t:1},{s:1,t:2},{s:1,t:3},{s:1,t:4},{s:1,t:5},{s:5,t:6},{s:1,t:7},{s:7,t:8}
+  ];
+  // Randomize positions
+  nodes.forEach(n=>{n.x=Math.random()*cvs.width; n.y=Math.random()*cvs.height; n.vx=0; n.vy=0});
+  let dragging=null;
+  cvs.addEventListener('mousedown',e=>{
+    const p=pos(e); dragging=hit(p.x,p.y);
+  });
+  cvs.addEventListener('mouseup',()=>dragging=null);
+  cvs.addEventListener('mousemove',e=>{if(dragging){const p=pos(e); dragging.x=p.x; dragging.y=p.y}});
+  cvs.addEventListener('click',e=>{
+    const n=hit(...Object.values(pos(e))); if(n){n.done=!n.done}
+  });
+  function pos(e){const r=cvs.getBoundingClientRect(); return {x:e.clientX-r.left, y:e.clientY-r.top}}
+  function hit(x,y){for(const n of nodes){const dx=n.x-x, dy=n.y-y; if(dx*dx+dy*dy<18*18) return n} return null}
+  function step(){
+    // force layout
+    for(const ln of links){const a=nodes[ln.s], b=nodes[ln.t]; const dx=b.x-a.x, dy=b.y-a.y; const d=Math.hypot(dx,dy)||1; const k=(d-140)*0.002; const fx=dx*k, fy=dy*k; a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy}
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i], b=nodes[j]; const dx=b.x-a.x, dy=b.y-a.y; const d2=dx*dx+dy*dy; const min=90; if(d2<min*min){const d=Math.sqrt(d2)||1; const k=(min-d)*0.004; const ux=dx/d, uy=dy/d; a.vx-=ux*k; a.vy-=uy*k; b.vx+=ux*k; b.vy+=uy*k}
+      }
+    }
+    for(const n of nodes){ if(n!==dragging){ n.x+=n.vx; n.y+=n.vy; }
+      n.vx*=0.9; n.vy*=0.9; n.x=Math.max(16, Math.min(cvs.width-16, n.x)); n.y=Math.max(16, Math.min(cvs.height-16, n.y)); }
+  }
+  function draw(){
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    // links
+    ctx.globalAlpha=.5; ctx.strokeStyle='rgba(122,226,255,.5)'; ctx.lineWidth=1.2;
+    for(const ln of links){const a=nodes[ln.s], b=nodes[ln.t]; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();}
+    // nodes
+    for(const n of nodes){
+      const r=16; ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
+      const grad=ctx.createRadialGradient(n.x,n.y,2,n.x,n.y,r);
+      grad.addColorStop(0, n.done?'#37d399':'#cbe8ff');
+      grad.addColorStop(1, 'rgba(255,255,255,.08)');
+      ctx.fillStyle=grad; ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.stroke();
+      ctx.font='12px system-ui,Segoe UI'; ctx.fillStyle='rgba(230,243,255,.9)'; ctx.textAlign='center'; ctx.fillText(n.id, n.x, n.y-22);
+    }
+  }
+  (function animate(){step(); draw(); requestAnimationFrame(animate)})();
+  document.getElementById('resetGraph').onclick=()=>{nodes.forEach(n=>{n.x=Math.random()*cvs.width; n.y=Math.random()*cvs.height})}
+
+  /* --- Exports & Briefs --- */
+  function collect(){
+    const gear=[...document.querySelectorAll('#gearTbl tbody tr')].map(tr=>{const [n,q,u]=tr.querySelectorAll('input'); return {name:n.value, qty:+q.value, unit:+u.value}});
+    const actions=nodes.map(n=>({step:n.id, done:n.done}));
+    const budget={subtotal:document.getElementById('subtotal').textContent, contingency:document.getElementById('cont').textContent, total:document.getElementById('grand').textContent};
+    return {generatedAt:new Date().toISOString(), focusWeeks:[4,5,6], actions, gear, budget};
+  }
+  document.getElementById('exportPlan').onclick=()=>{
+    const data=collect(); const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='micro_grant_plan.json'; a.click(); URL.revokeObjectURL(a.href);
+  }
+  document.getElementById('printBrief').onclick=()=>{
+    const d=collect();
+    const w=window.open('','_blank');
+    w.document.write(`<pre style="white-space:pre-wrap;font:14px/1.4 ui-monospace, SFMono-Regular; padding:16px">`+JSON.stringify(d,null,2)+`</pre>`);
+    w.document.close(); w.focus(); w.print();
+  }
+
+  /* --- Micro‑MoU & Partner brief (clipboard) --- */
+  const BRIEF=`Micogrant focus (weeks 4–6): diagnostics cartridges; cold‑chain (coolers, ice packs, temp loggers); PPE; fuel/transport; comms.\nRouting: WHO‑linked partner per SOP; neutral implementers only; public non‑sensitive ledger; receipts archived.\nDo‑no‑harm: no payments to armed actors; deconfliction/access letter required; staff safety brief refreshed.\nAudit: approvals, POs, delivery confirmations (no patient data).`;
+  document.getElementById('copyBrief').onclick=()=>{navigator.clipboard.writeText(BRIEF).then(()=>alert('Partner brief copied.'))}
+  const MOU=`Purpose: time‑boxed micro‑grant to bridge week‑4–6 operational gaps.\nScope: diagnostics consumables; cold‑chain support; PPE; limited fuel/transport.\nCompliance: adhere to WHO/Ministry protocols; use neutral implementers; publish non‑sensitive ledger entries.\nAccess & safety: secure written deconfliction and corridor assurances; no engagement with armed actors.\nData: no collection of patient‑identifiable data.`;
+  document.getElementById('makeMoU').onclick=()=>{navigator.clipboard.writeText(MOU).then(()=>alert('MoU snippet copied.'))}
+  </script>
+</body>
+</html>

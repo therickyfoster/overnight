@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Peaceable Transition Packet — Two‑Pager for PMO/Finance (Standalone)</title>
+  <meta name="description" content="Standalone, print‑ready two‑pager with parallax constellations, starfield, and interactive mycelium action web: mandatory transition‑plan disclosure, capital‑weighting for fossil risk, and biodiversity‑linked restoration credits with Alberta pilots."/>
+  <style>
+    :root{
+      --bg:#070a12;         /* deep space */
+      --ink:#e6eefc;        /* starlight text */
+      --muted:#9bb3d1;
+      --glow: 0 0 30px rgba(130,180,255,.25), 0 0 80px rgba(100,150,255,.15);
+      --accent:#94f9c9;     /* mycelial mint */
+      --accent2:#c9a2ff;    /* cosmic violet */
+      --accent3:#ffd479;    /* auric */
+      --card:#0c1220aa;     /* glassy */
+      --stroke:#2b3a58;     /* subtle borders */
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 70% 10%, #0f1830 0%, #0a0f1f 35%, var(--bg) 70%) fixed;
+      color:var(--ink);
+      font: 16px/1.65 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+      overflow-x:hidden;
+    }
+
+    /* Starfield layers for parallax */
+    canvas.starfield{position:fixed;inset:0;z-index:-3;}
+    .nebula{position:fixed;inset:-10vh;pointer-events:none;z-index:-2;
+      background:
+        radial-gradient(60vh 40vh at 10% 20%, rgba(130,160,255,.06), transparent 60%),
+        radial-gradient(80vh 50vh at 80% 10%, rgba(120,255,210,.05), transparent 60%),
+        radial-gradient(70vh 40vh at 60% 70%, rgba(200,150,255,.05), transparent 60%);
+      filter: blur(8px) saturate(120%);
+    }
+
+    /* Layout */
+    .wrap{max-width:1150px;margin:0 auto;padding:8rem 1.25rem 6rem;position:relative}
+    header.hero{display:grid;gap:1rem;place-items:center;text-align:center;margin-bottom:1.25rem}
+    .crest{font-size:13px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+    h1{font-weight:800;font-size: clamp(28px, 4.4vw, 54px);line-height:1.08;margin:.25rem 0 0;text-shadow: var(--glow)}
+    .tag{color:var(--muted);max-width:62ch}
+
+    /* Action bar */
+    .bar{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;margin:1rem 0 2.5rem}
+    .btn{appearance:none;border:1px solid var(--stroke);background:linear-gradient(180deg,#0e1526,#0b1222);
+      color:var(--ink);padding:.75rem 1rem;border-radius:14px;cursor:pointer;backdrop-filter: blur(6px);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 6px 20px rgba(0,0,0,.25);transition:.2s transform,.2s box-shadow}
+    .btn:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 14px 28px rgba(0,0,0,.35)}
+    .btn.primary{border-color:#245c5a;background:
+      radial-gradient(90% 140% at 0% 0%, rgba(148,249,201,.18), transparent 40%),
+      linear-gradient(180deg,#0f2a2b,#0b1d1f)}
+    .btn span.small{opacity:.75;font-size:.85em}
+
+    /* Cards grid */
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+    .card{position:relative;border:1px solid var(--stroke);border-radius:18px;padding:18px 18px 16px;background:linear-gradient(180deg, rgba(18,26,44,.85), rgba(10,16,32,.7));box-shadow: var(--glow);overflow:hidden}
+    .card h3{margin:.25rem 0 .5rem;font-size:1.15rem}
+    .card .k{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem .6rem;border:1px solid #27465f;border-radius:999px;font-size:.8rem;color:#bcd1eb;background:linear-gradient(180deg,#0d1626,#0b1322)}
+    .card .meta{font-size:.9rem;color:var(--muted)}
+
+    /* Section titles */
+    .section{margin:2.8rem 0}
+    .section h2{font-size: clamp(22px, 3.2vw, 36px);margin:0 0 .8rem}
+    .section p.lede{color:#d5e6ff;max-width:70ch}
+
+    /* Two‑Pager (print‑ready) */
+    .twopager{display:grid;grid-template-columns:1fr;gap:16px;margin-top:1.5rem}
+    .page{border:1px dashed #27465f;border-radius:18px;padding:18px;background:linear-gradient(180deg,rgba(16,24,44,.85),rgba(10,14,28,.7))}
+    .page h3{margin-top:0}
+    .bullet{display:grid;grid-template-columns:auto 1fr;gap:.6rem 1rem;margin:.35rem 0}
+    .bullet .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--accent);margin-top:.45rem;box-shadow:0 0 14px rgba(148,249,201,.45)}
+    .check{display:inline-block;padding:.18rem .5rem;border-radius:10px;border:1px solid #2d4a5f;background:#0d1726;font-size:.8rem;color:#cde7ff}
+
+    /* Mycelium Web */
+    .webwrap{position:relative;border:1px solid var(--stroke);border-radius:22px;overflow:hidden;margin-top:1rem}
+    canvas#web{width:100%;height:520px;display:block;background: radial-gradient(1200px 800px at 30% 0%, rgba(148,249,201,.04), transparent 40%),
+      radial-gradient(900px 600px at 90% 90%, rgba(201,162,255,.04), transparent 40%)}
+    .legend{position:absolute;inset:auto 8px 8px auto;background:#0a1322cc;padding:.6rem .7rem;border:1px solid var(--stroke);border-radius:12px;font-size:.85rem;color:#cfe2ff}
+
+    /* Footnotes */
+    footer{margin:3rem 0 0;color:var(--muted);text-align:center;font-size:.9rem}
+
+    /* Print styles: force two pages with clear headers */
+    @media print{
+      body{background:#fff;color:#111}
+      .nebula,canvas.starfield,.bar,.webwrap,footer{display:none !important}
+      .wrap{max-width:none;padding:0;margin:0}
+      header.hero{margin:0 0 8mm}
+      .crest{color:#334}
+      h1{color:#000;text-shadow:none}
+      .section{page-break-inside:avoid}
+      .page{border:none;background:#fff}
+      .page:nth-child(1){page-break-after:always}
+      .card{border:1px solid #ccc;background:#fff;box-shadow:none}
+      .twopager{gap:0}
+    }
+
+    /* Subtle motion accents */
+    .twinkle{animation: twinkle 2.2s ease-in-out infinite alternate}
+    @keyframes twinkle{from{opacity:.75;filter: drop-shadow(0 0 0 rgba(148,249,201,0))}to{opacity:1;filter: drop-shadow(0 0 8px rgba(148,249,201,.55))}}
+    .floaty{transform:translateY(0);animation: floaty 8s ease-in-out infinite}
+    @keyframes floaty{50%{transform:translateY(-6px)}}
+  </style>
+</head>
+<body>
+  <canvas class="starfield" id="stars1" aria-hidden="true"></canvas>
+  <canvas class="starfield" id="stars2" aria-hidden="true"></canvas>
+  <div class="nebula" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header class="hero">
+      <div class="crest">Peace‑Aligned Finance • Zero‑Harm • Verifiable</div>
+      <h1>Two‑Pager to PMO/Finance: Transition Plans, Fossil Risk, & Biodiversity Credits</h1>
+      <p class="tag">Parallax constellations + mycelial action web to enable peace without destabilization. Anchored in the “risks beyond the planning horizon” framing and geared for rapid Alberta pilots.</p>
+      <div class="bar">
+        <button class="btn primary" onclick="window.print()">Print / Save as PDF <span class="small">(Two‑Pager)</span></button>
+        <button class="btn" id="toggleConstellations">Toggle Constellations</button>
+        <button class="btn" id="reduceMotion">Reduce Motion</button>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2 class="twinkle">Executive Signal</h2>
+      <div class="grid">
+        <article class="card floaty">
+          <h3>Why now</h3>
+          <p>Delayed transition is an <em>exponential</em> risk transfer to future taxpayers and households. Aligning finance with credible transition plans 
+          reduces volatility, smooths political risk, and frees up capital for restoration, healthcare, and affordability. Peace loves predictability.</p>
+          <p class="meta">Premise: markets misprice long‑tail climate and biodiversity risk when disclosures are patchy or non‑comparable. Fix the plumbing.</p>
+        </article>
+        <article class="card floaty">
+          <h3>Three levers (mutually reinforcing)</h3>
+          <ul>
+            <li><span class="k">1</span> <strong>Mandatory transition‑plan disclosure</strong> using common metrics and sector pathways.</li>
+            <li><span class="k">2</span> <strong>Capital‑weighting for fossil risk</strong> so balance sheets reflect real transition + liability risk.</li>
+            <li><span class="k">3</span> <strong>Biodiversity‑linked restoration credits</strong> with auditable MRV and Indigenous leadership.</li>
+          </ul>
+          <p class="meta">Design choice: low‑friction pilots in <strong>Alberta</strong> to prove jobs, certainty, and revenue sharing.</p>
+        </article>
+        <article class="card floaty">
+          <h3>Guardrails for non‑destabilization</h3>
+          <p><span class="check">No shocks</span> phase‑ins, <span class="check">predictable schedules</span>, <span class="check">grandfathering where needed</span>, 
+            <span class="check">just‑transition supports</span>, <span class="check">household buffers</span>, and <span class="check">community revenue shares</span>.</p>
+          <p class="meta">Outcome: peaceable transition that de‑risks supply chains, preserves energy security, and accelerates restoration.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="twinkle">The Two‑Pager</h2>
+      <div class="twopager">
+        <div class="page">
+          <h3>Page 1 — Policy Brief (for PMO/Finance)</h3>
+          <p class="lede"><strong>Objective:</strong> Make credible transition the market default by aligning disclosures, risk weights, and investable restoration.</p>
+
+          <div class="bullet"><div class="dot"></div><div>
+            <strong>1) Mandatory Transition‑Plan Disclosure</strong><br>
+            Require large issuers and financial institutions to publish <em>comparable, decision‑useful</em> plans with short‑, medium‑, and long‑horizon milestones. 
+            Include Scope 1–3, capex alignment, and governance. Accept recognized pathways and allow sector‑specific flexibility with a national baseline.
+          </div></div>
+
+          <div class="bullet"><div class="dot" style="background:var(--accent2)"></div><div>
+            <strong>2) Capital‑Weighting for Fossil Risk</strong><br>
+            Introduce supervisory guidance enabling <em>higher risk weights</em> where stranded‑asset, liability, or transition risk is material, and 
+            <em>relief</em> where exposures are credibly aligned with transition pathways (e.g., methane abatement, grid flexibility, worker retraining finance).
+          </div></div>
+
+          <div class="bullet"><div class="dot" style="background:var(--accent3)"></div><div>
+            <strong>3) Biodiversity‑Linked Restoration Credits</strong><br>
+            Establish a public‑good registry for <em>restoration credits</em> tied to measurable ecosystem outcomes (soil, wetlands, riparian buffers, pollinator habitat). 
+            Credits are <em>additive</em> to emissions policy, designed for co‑benefits (flood protection, wildfire buffers, food security) with auditable MRV.
+          </div></div>
+
+          <div class="bullet"><div class="dot"></div><div>
+            <strong>Framing</strong><br>
+            Markets discount harms beyond the planning horizon. Policy should pull those risks forward so prices tell the truth, capital flows 
+            predictably, and communities gain from restoration rather than bearing last‑mile losses.
+          </div></div>
+
+          <div class="bullet"><div class="dot"></div><div>
+            <strong>Peace Lens</strong><br>
+            Predictable rules reduce grievance, stabilize expectations, and convert adversarial narratives into shared value—jobs, health, and habitat.
+          </div></div>
+        </div>
+
+        <div class="page">
+          <h3>Page 2 — Alberta Pilot Blueprint (12‑month)</h3>
+          <div class="grid">
+            <div class="card">
+              <h3>Pilot A — Disclosure Sandbox</h3>
+              <p>Volunteer cohort of energy, finance, and utilities produces <em>comparable</em> transition plans using a common template and third‑party attestation. 
+              Output: public dashboards, investor‑grade KPIs, and community‑level co‑benefit maps.</p>
+              <p class="meta">Support: provincial + federal secretariat, open templates, tech assistance, training grants.</p>
+            </div>
+            <div class="card">
+              <h3>Pilot B — Risk‑Weight Modulation</h3>
+              <p>Supervisor‑blessed test where banks apply calibrated add‑ons to exposures with high transition risk, and relief for <em>verified</em> mitigation 
+                (e.g., methane capture, reclamation bonds, worker skilling). Publish anonymized findings.</p>
+              <p class="meta">Guardrail: no cliff effects; gradual phase‑in; independent evaluation.</p>
+            </div>
+            <div class="card">
+              <h3>Pilot C — Restoration Credit Stack</h3>
+              <p>Launch a <em>provincial restoration portfolio</em> (wetlands, shelterbelts, peatland repair, urban tree canopy) with project MRV, 
+                Indigenous co‑governance, and revenue‑sharing to municipalities and First Nations.</p>
+              <p class="meta">Use credits to de‑risk private capex and reward measurable nature gains.</p>
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:12px">
+            <div class="card">
+              <h3>Timeline</h3>
+              <ul>
+                <li><strong>Day 0–30:</strong> Publish templates + criteria; recruit cohorts; open data rooms.</li>
+                <li><strong>Day 31–180:</strong> Draft plans; calibrate risk weights; register first restoration sites.</li>
+                <li><strong>Day 181–365:</strong> Public dashboards; first credit issuances; evaluation + national scale‑up plan.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Non‑Destabilization Kit</h3>
+              <ul>
+                <li>Household buffer funds + bill protection for low‑income homes.</li>
+                <li>Worker transition vouchers and portable training accounts.</li>
+                <li>Community revenue share from restoration credits.</li>
+                <li>Energy reliability checks: no pilot reduces resilience.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Contact Packet (example)</h3>
+              <p><em>Subject:</em> Alberta pilots to operationalize credible transition & restoration credits</p>
+              <p><em>Body:</em> Enclosed: two‑pager + pilot MOUs, open templates, and evaluation plan. We seek a joint PMO/Finance signal and a 12‑month sandbox. 
+              All methods are auditable, zero‑harm, and verifiable.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="twinkle">Interactive Mycelium Web — Actions Without Destabilization</h2>
+      <p class="lede">Click a node to expand concrete steps. The network shows 
+        <em>how disclosure, risk‑weighting, and restoration credits interlock</em> to stabilize households and accelerate peace.</p>
+      <div class="webwrap">
+        <canvas id="web" aria-label="Interactive mycelium action graph"></canvas>
+        <div class="legend">Legend: mint = disclosure • violet = risk‑weights • gold = restoration • blue = guardrails</div>
+      </div>
+    </section>
+
+    <footer>
+      Built as a standalone artifact. No external dependencies. Print to PDF for the official two‑pager. 
+      <br/>Zero‑harm • Transparency • Sovereignty • Verifiability.
+    </footer>
+  </div>
+
+<script>
+/***********************************
+ * Starfield + Constellations (parallax)
+ ***********************************/
+(function(){
+  const DPR = Math.min(window.devicePixelRatio||1, 2);
+  const canvases = [document.getElementById('stars1'), document.getElementById('stars2')];
+  const layers = [
+    {count: 140, speed: .02, connect: false},
+    {count: 100, speed: .05, connect: true}
+  ];
+  let mouse = {x: innerWidth/2, y: innerHeight/2};
+  let reduceMotion = false, showConstellations = true;
+
+  canvases.forEach((cv, i)=>{
+    const ctx = cv.getContext('2d');
+    function resize(){
+      cv.width = innerWidth*DPR; cv.height = innerHeight*DPR; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
+    }
+    resize();
+    let stars = [];
+    for(let s=0; s<layers[i].count; s++){
+      stars.push({
+        x: Math.random()*cv.width,
+        y: Math.random()*cv.height,
+        z: Math.random()*1 + (i? .4:.1),
+        r: (i? 1.2: .8) + Math.random()*1.2,
+        vx: (Math.random()-.5)*.2,
+        vy: (Math.random()-.5)*.2
+      });
+    }
+    function tick(){
+      if(reduceMotion){ ctx.clearRect(0,0,cv.width,cv.height); draw(); return requestAnimationFrame(tick); }
+      // space drift
+      for(const p of stars){
+        p.x += p.vx; p.y += p.vy;
+        if(p.x<0) p.x += cv.width; if(p.x>cv.width) p.x -= cv.width;
+        if(p.y<0) p.y += cv.height; if(p.y>cv.height) p.y -= cv.height;
+      }
+      ctx.clearRect(0,0,cv.width,cv.height);
+      draw();
+      requestAnimationFrame(tick);
+    }
+    function draw(){
+      const parX = (mouse.x - innerWidth/2) * layers[i].speed * DPR;
+      const parY = (mouse.y - innerHeight/2) * layers[i].speed * DPR;
+      ctx.save();
+      ctx.translate(parX, parY);
+      for(const p of stars){
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*2*DPR);
+        grad.addColorStop(0, 'rgba(255,255,255,.9)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r*DPR, 0, Math.PI*2); ctx.fill();
+      }
+      if(layers[i].connect && showConstellations){
+        for(let a=0;a<stars.length;a++){
+          for(let b=a+1;b<stars.length;b++){
+            const A = stars[a], B = stars[b];
+            const dx=A.x-B.x, dy=A.y-B.y; const d=Math.hypot(dx,dy)/DPR;
+            if(d<140){
+              const alpha = (1 - d/140) * 0.25;
+              ctx.strokeStyle = 'rgba(156, 200, 255,'+alpha+')';
+              ctx.lineWidth = 0.6*DPR;
+              ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
+            }
+          }
+        }
+      }
+      ctx.restore();
+    }
+    addEventListener('resize', resize);
+    addEventListener('mousemove', e=>{mouse.x=e.clientX; mouse.y=e.clientY});
+    tick();
+    // Controls
+    document.getElementById('toggleConstellations').onclick=()=>{showConstellations=!showConstellations};
+    document.getElementById('reduceMotion').onclick=()=>{reduceMotion=!reduceMotion};
+  });
+})();
+
+/***********************************
+ * Interactive Mycelium Web
+ ***********************************/
+(function(){
+  const canvas = document.getElementById('web');
+  const ctx = canvas.getContext('2d');
+  let DPR = Math.min(devicePixelRatio||1, 2);
+  function resize(){
+    const r = canvas.getBoundingClientRect();
+    canvas.width = r.width*DPR; canvas.height = r.height*DPR;
+  }
+  resize(); addEventListener('resize', resize);
+
+  const mint = '#94f9c9', violet='#c9a2ff', gold='#ffd479', blue='#85b6ff';
+  const nodes = [
+    N('Disclosure', 0.18, .22, mint, [
+      'Common templates (capex, Scope 1–3, governance)',
+      'Sector pathways as reference, not straitjackets',
+      'Third‑party attestation + open data rooms'
+    ]),
+    N('Risk‑Weights', .48, .12, violet, [
+      'Supervisor guidance + calibration windows',
+      'Add‑ons for stranded/liability risk',
+      'Relief for verified mitigation (methane, reclamation)'
+    ]),
+    N('Restoration Credits', .78, .28, gold, [
+      'Public‑good registry + auditable MRV',
+      'Indigenous co‑governance + revenue sharing',
+      'Co‑benefits: flood, wildfire, food security'
+    ]),
+    N('Guardrails', .50, .55, blue, [
+      'No‑shock phase‑ins, predictable schedules',
+      'Household buffers + bill protection',
+      'Worker vouchers + portable training'
+    ]),
+    // Alberta pilots
+    N('AB Pilot A', .22, .62, mint, [
+      'Disclosure sandbox cohort', 'Attestation support', 'Community co‑benefit maps'
+    ]),
+    N('AB Pilot B', .50, .78, violet, [
+      'Calibrated add‑ons/relief', 'Independent evaluation', 'No cliff effects'
+    ]),
+    N('AB Pilot C', .78, .70, gold, [
+      'Portfolio of wetlands/peatlands/trees', 'MRV stack', 'Municipal + First Nations shares'
+    ])
+  ];
+  const links = [
+    L('Disclosure','Risk‑Weights'), L('Disclosure','Restoration Credits'), L('Risk‑Weights','Restoration Credits'),
+    L('Disclosure','Guardrails'), L('Risk‑Weights','Guardrails'), L('Restoration Credits','Guardrails'),
+    L('Disclosure','AB Pilot A'), L('Risk‑Weights','AB Pilot B'), L('Restoration Credits','AB Pilot C'),
+    L('Guardrails','AB Pilot A'), L('Guardrails','AB Pilot B'), L('Guardrails','AB Pilot C')
+  ];
+
+  function N(label, x, y, color, steps){return {label,x,y,color,steps, r: 32, open:false}};
+  function L(a,b){return {a, b}};
+  function find(label){return nodes.find(n=>n.label===label)}
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.save(); ctx.translate(0.5,0.5); // crisp lines
+    // links
+    for(const e of links){
+      const A=find(e.a), B=find(e.b);
+      const ax=A.x*canvas.width, ay=A.y*canvas.height, bx=B.x*canvas.width, by=B.y*canvas.height;
+      const grad = ctx.createLinearGradient(ax,ay,bx,by);
+      grad.addColorStop(0, A.color); grad.addColorStop(1, B.color);
+      ctx.strokeStyle = grad; ctx.lineWidth = 1.6*DPR; ctx.globalAlpha=.6;
+      ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); ctx.globalAlpha=1;
+    }
+    // nodes
+    for(const n of nodes){
+      const x=n.x*canvas.width, y=n.y*canvas.height;
+      // halo
+      const halo=ctx.createRadialGradient(x,y,0,x,y, 36*DPR);
+      halo.addColorStop(0, n.color+'aa'); halo.addColorStop(1, 'transparent');
+      ctx.fillStyle=halo; ctx.beginPath(); ctx.arc(x,y, 36*DPR, 0, Math.PI*2); ctx.fill();
+      // core
+      ctx.fillStyle = '#0a1426'; ctx.strokeStyle = n.color; ctx.lineWidth=2*DPR;
+      ctx.beginPath(); ctx.arc(x,y, n.r*DPR, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // label
+      ctx.fillStyle = '#dff6ff'; ctx.font = `${14*DPR}px system-ui, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(n.label, x, y);
+
+      if(n.open){ drawPanel(n, x,y); }
+    }
+    ctx.restore();
+    requestAnimationFrame(draw);
+  }
+
+  function drawPanel(n, x,y){
+    const pad = 10*DPR; const lineH=16*DPR; const w = 340*DPR; const h = (n.steps.length*lineH)+pad*2+8*DPR;
+    let px = x + 44*DPR, py = y - h/2; if(px+w > canvas.width) px = x - w - 44*DPR; if(py<8) py=8; if(py+h>canvas.height-8) py=canvas.height-h-8;
+    // box
+    ctx.fillStyle = 'rgba(12,20,36,.9)'; ctx.strokeStyle = n.color; ctx.lineWidth=1*DPR;
+    roundRect(ctx, px,py,w,h, 12*DPR); ctx.fill(); ctx.stroke();
+    // header
+    ctx.fillStyle = n.color; ctx.font=`${12*DPR}px system-ui`; ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillText('Concrete Steps', px+pad, py+pad-2);
+    // items
+    ctx.fillStyle = '#cfe6ff'; ctx.font=`${12*DPR}px system-ui`;
+    let ty = py + pad + 12*DPR;
+    for(const s of n.steps){ ctx.fillText('• '+s, px+pad, ty); ty += lineH; }
+  }
+
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function hit(mx,my){
+    const x = mx*DPR, y=my*DPR;
+    for(const n of nodes){
+      const nx=n.x*canvas.width, ny=n.y*canvas.height; if(Math.hypot(nx-x, ny-y) < n.r*DPR) return n;
+    } return null;
+  }
+
+  canvas.addEventListener('click', e=>{
+    const r=canvas.getBoundingClientRect(); const n=hit(e.clientX - r.left, e.clientY - r.top); if(n){ n.open = !n.open; }
+  });
+
+  draw();
+})();
+</script>
+</body>
+</html>

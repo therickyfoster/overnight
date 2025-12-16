@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mycelial Policy Kit • Climate-Finance Alignment for Canada</title>
+<meta name="description" content="A standalone, animated mycelial policy kit that packages practical, restoration-aligned actions for Canadian climate-finance NGOs and decision-makers." />
+<style>
+  /* --- Core Theme (inspired by PRA proof/analysis aesthetic) --- */
+  :root{
+    --bg:#04070b; --ink:#eaf2ff; --muted:#9fb3cc; --glow:#77e3c6; --accent:#a7b7ff;
+    --mesh:#14202e; --card:#0b1118; --pill:#0f1822; --good:#3be089; --warn:#ffd166; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);color:var(--ink);margin:0;font:16px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial;}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{position:relative;isolation:isolate}
+  /* Parallax layers */
+  .layer{position:fixed;inset:0;pointer-events:none;z-index:-2}
+  /* Mesh gradient background */
+  .mesh{
+    background:
+      radial-gradient(1200px 800px at 10% 10%, #0b1421 0%, transparent 60%),
+      radial-gradient(1000px 700px at 90% 30%, #07111a 0%, transparent 55%),
+      radial-gradient(900px 700px at 30% 90%, #0e1a29 0%, transparent 55%),
+      linear-gradient(180deg, #050a11 0%, #060a0f 100%);
+    filter: saturate(1.1);
+  }
+  /* Canvas network */
+  #mycelium{display:block; width:100%; height:100%;}
+  /* Glass cards */
+  .card{
+    background:color-mix(in oklab, var(--card) 85%, transparent);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:20px; box-shadow:0 0 0 1px rgba(119,227,198,.06) inset, 0 20px 60px rgba(0,0,0,.45);
+    backdrop-filter: blur(6px);
+  }
+  /* Header / Hero */
+  header{
+    position:relative; padding:7rem 1.25rem 3rem; max-width:1200px; margin:0 auto; text-align:center;
+  }
+  .title{
+    font-size:clamp(1.6rem, 4.5vw, 3.2rem);
+    letter-spacing:.4px; line-height:1.1; margin:0 0 .6rem;
+    text-shadow: 0 0 18px rgba(119,227,198,.18);
+  }
+  .kicker{color:var(--muted); font-size:clamp(.95rem,1.8vw,1.1rem);}
+  .ctaRow{margin:1.25rem auto 0; display:flex; gap:.7rem; flex-wrap:wrap; justify-content:center}
+  .btn{
+    background:linear-gradient(180deg, #0e1c2a, #0a1520);
+    border:1px solid rgba(119,227,198,.35); color:var(--ink);
+    padding:.8rem 1rem; border-radius:999px; font-weight:600; letter-spacing:.3px;
+    box-shadow:0 8px 40px rgba(119,227,198,.15);
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+    display:inline-flex; align-items:center; gap:.5rem;
+  }
+  .btn:hover{transform:translateY(-2px); box-shadow:0 16px 50px rgba(119,227,198,.28)}
+  .pill{background:var(--pill); padding:.25rem .6rem; border-radius:999px; font-size:.8rem; color:var(--muted); border:1px solid rgba(255,255,255,.06)}
+  /* Sections */
+  section{max-width:1100px; margin:2rem auto; padding:0 1.25rem}
+  .grid{display:grid; gap:1rem}
+  @media(min-width:860px){ .grid{grid-template-columns:1.1fr 1.1fr} }
+  h2{font-size:clamp(1.2rem,2.9vw,1.8rem); margin:0 0 .6rem}
+  .meta{color:var(--muted); font-size:.95rem}
+  .badge{display:inline-flex; align-items:center; gap:.4rem; font-size:.8rem; padding:.3rem .6rem; border-radius:999px; border:1px solid rgba(255,255,255,.08)}
+  .g{background:rgba(59,224,137,.08); border-color:rgba(59,224,137,.3); color:var(--good)}
+  .w{background:rgba(255,209,102,.08); border-color:rgba(255,209,102,.3); color:var(--warn)}
+  .b{background:rgba(255,107,107,.08); border-color:rgba(255,107,107,.3); color:var(--bad)}
+  /* Accordions */
+  details{border:1px solid rgba(255,255,255,.07); background:rgba(10,18,28,.6); border-radius:14px; overflow:hidden}
+  details+details{margin-top:.8rem}
+  summary{cursor:pointer; list-style:none; padding:1rem 1.1rem; font-weight:700; position:relative}
+  summary::-webkit-details-marker{display:none}
+  .chev{position:absolute; right:14px; top:16px; transition:transform .25s ease}
+  details[open] .chev{transform:rotate(180deg)}
+  .pane{padding:0 1.1rem 1rem; color:var(--muted)}
+  .list{display:grid; gap:.6rem; margin:.8rem 0}
+  .check{display:flex; gap:.6rem; align-items:flex-start}
+  .check input{transform:translateY(3px)}
+  .small{font-size:.9rem}
+  /* Footnotes / evidence drawer */
+  .drawer{
+    position:fixed; right:18px; bottom:20px; width:min(560px, calc(100% - 36px));
+    z-index:5;
+  }
+  .drawer .tab{
+    display:flex; justify-content:space-between; align-items:center; gap:.6rem;
+    border:1px solid rgba(255,255,255,.07); background:rgba(12,20,30,.85);
+    border-radius:12px; padding:.7rem .9rem; cursor:pointer;
+    box-shadow:0 12px 40px rgba(0,0,0,.45);
+  }
+  .drawer .body{display:none; margin-top:.5rem}
+  .drawer.open .body{display:block}
+  .note{font-size:.9rem; color:var(--muted)}
+  .kbd{font:600 .8rem ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; color:var(--glow)}
+  /* Subtle scanline shimmer */
+  .shine{position:relative; overflow:hidden}
+  .shine::after{
+    content:""; position:absolute; inset:-150% -150% auto; height:200%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+    transform:skewX(-20deg); animation:shine 8s linear infinite;
+  }
+  @keyframes shine{0%{transform:translateX(-60%) skewX(-20deg)} 100%{transform:translateX(60%) skewX(-20deg)}}
+  /* Tiny helper */
+  .row{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center}
+  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Background layers -->
+  <div class="layer mesh"></div>
+  <canvas class="layer" id="mycelium" aria-hidden="true"></canvas>
+
+  <header>
+    <div class="pill">Zero-harm • Transparency • Verifiability</div>
+    <h1 class="title">Mycelial Policy Kit for Canadian Climate-Finance</h1>
+    <p class="kicker">Package the practical: mandatory transition plans, fossil-risk discipline, nature-positive capital flows. Treat extraction and delay as obsolete operating systems; upgrade to restoration as the default.</p>
+    <div class="ctaRow">
+      <button class="btn" data-jump="#policy">Open the Kit</button>
+      <button class="btn" data-jump="#blueprints">Blueprints</button>
+      <button class="btn" data-jump="#evidence">Evidence</button>
+    </div>
+  </header>
+
+  <!-- POLICY KIT -->
+  <section id="policy" class="grid">
+    <article class="card shine" style="padding:1.1rem">
+      <h2>Policy Strands (Pick-and-Weave)</h2>
+      <p class="meta">Each strand is a hyphal thread; together they form a resilient, auditable network. Select items to assemble your letter-ready package.</p>
+
+      <details open>
+        <summary>1) Mandatory Transition Plans <span class="chev">▾</span></summary>
+        <div class="pane">
+          <div class="row"><span class="badge g">Purpose</span><span class="badge">Paris-aligned, sector-specific, auditable</span></div>
+          <div class="list">
+            <label class="check"><input type="checkbox" /> Publish economy-wide rules for entity-level transition plans aligned with IFRS-S2 + OSFI B-15 touchpoints; require board attestation and scenario analysis.</label>
+            <label class="check"><input type="checkbox" /> Set rolling 3-year update cycles with interim targets (scope 1–3 where material), backed by assurance phases (limited → reasonable over time).</label>
+            <label class="check"><input type="checkbox" /> Tie executive pay to credible plan milestones; prohibit “plan washing” via standardized performance KPIs.</label>
+          </div>
+          <div class="small">Regulatory anchor: OSFI B-15 (FRFIs), with a federal issuer track via CSA once resumed; interim federal guidance can bridge the CSA pause with procurement and Crown-corp requirements.</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>2) Fossil Financial Risk Discipline <span class="chev">▾</span></summary>
+        <div class="pane">
+          <div class="row"><span class="badge w">Risk</span><span class="badge">Credit • Market • Liability</span></div>
+          <div class="list">
+            <label class="check"><input type="checkbox" /> Directional capital treatment: progressive risk weights / provisioning for high-dependency fossil exposures; recognize stranded-asset and litigation channels.</label>
+            <label class="check"><input type="checkbox" /> Collateral policy: haircut fossil-linked collateral at central-bank and public-lender windows; prefer nature-positive collateral structures.</label>
+            <label class="check"><input type="checkbox" /> Stress testing: disorderly transition + chronic physical hazards; publish summarized results with remediation timelines.</label>
+          </div>
+          <div class="small">Rationale: price the real risk so capital flows toward resilience instead of amplifying tail-risk volatility.</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>3) Made-in-Canada Sustainable Taxonomy (Nature-Positive by Default) <span class="chev">▾</span></summary>
+        <div class="pane">
+          <div class="row"><span class="badge g">Enable</span><span class="badge">Clear labels • Lower cost of capital</span></div>
+          <div class="list">
+            <label class="check"><input type="checkbox" /> Finalize a science-based taxonomy with “do-no-significant-harm” and Indigenous rights criteria; include transition activities with strict phase-out glidepaths.</label>
+            <label class="check"><input type="checkbox" /> Harmonize with EU/ISSB to cut issuer costs; publish open data APIs so markets can verify claims.</label>
+            <label class="check"><input type="checkbox" /> Pair taxonomy with public guarantee facilities for restoration-class projects (watersheds, wildfire buffers, urban canopies, peat & prairie).</label>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>4) Restoration Finance Toolkit (Mycelial) <span class="chev">▾</span></summary>
+        <div class="pane">
+          <div class="row"><span class="badge g">Flow</span><span class="badge">Regenerative tokenomics • Community wealth</span></div>
+          <div class="list">
+            <label class="check"><input type="checkbox" /> Issue <span class="mono">Restoration Performance Notes</span>: outcome-based coupons tied to verified ecological metrics (canopy cover, firebreak integrity, flood absorption).</label>
+            <label class="check"><input type="checkbox" /> Stand up a <span class="mono">Nature Repair Facility</span> that co-finances municipal and Indigenous-led projects with first-loss capital + taxonomy eligibility.</label>
+            <label class="check"><input type="checkbox" /> Create open ledgers for project MRV (monitoring/reporting/verification) with community co-governance and privacy-preserving attestations.</label>
+          </div>
+          <div class="small">Mycelial metaphor: many small threads = one strong body. Diversify projects; compound local benefits.</div>
+        </div>
+      </details>
+
+      <details>
+        <summary>5) Just Transition & Indigenous Leadership <span class="chev">▾</span></summary>
+        <div class="pane">
+          <div class="row"><span class="badge g">Dignity</span><span class="badge">Skills • Equity • Consent</span></div>
+          <div class="list">
+            <label class="check"><input type="checkbox" /> Earmark a fixed share of taxonomy-aligned finance for Indigenous-led restoration with Free, Prior and Informed Consent and revenue-sharing.</label>
+            <label class="check"><input type="checkbox" /> Establish worker transition accounts funded by levies on high-risk fossil exposures; eligible uses: retraining, relocation, entrepreneurship.</label>
+            <label class="check"><input type="checkbox" /> Require social-safeguard disclosures alongside climate metrics; penalize layoffs that externalize transition costs.</label>
+          </div>
+        </div>
+      </details>
+
+      <details>
+        <summary>6) Greenwashing Guardrails (Trust Engine) <span class="chev">▾</span></summary>
+        <div class="pane">
+          <div class="row"><span class="badge w">Guard</span><span class="badge">Assurance • Enforcement</span></div>
+          <div class="list">
+            <label class="check"><input type="checkbox" /> Align claims enforcement with the Competition Act updates; provide safe-harbour templates for evidence-based, auditable climate claims.</label>
+            <label class="check"><input type="checkbox" /> Public transparency portal: standardized dashboards + machine-readable filings; red-flag indicators trigger review.</label>
+          </div>
+        </div>
+      </details>
+    </article>
+
+    <!-- BLUEPRINTS / LETTER BUILDER -->
+    <aside id="blueprints" class="card" style="padding:1.1rem">
+      <h2>Rapid Letter Builder</h2>
+      <p class="meta">Toggle pieces below, then export. This packages a coordinated, restoration-aligned ask set for PM-level delivery.</p>
+
+      <details open>
+        <summary>Select Audiences <span class="chev">▾</span></summary>
+        <div class="pane list">
+          <label class="check"><input type="checkbox" class="aud" value="PMO" checked/> PMO / Privy Council</label>
+          <label class="check"><input type="checkbox" class="aud" value="Finance" checked/> Dept. of Finance / Crown Corporations</label>
+          <label class="check"><input type="checkbox" class="aud" value="OSFI" checked/> OSFI / Bank of Canada (prudential & collateral policy)</label>
+          <label class="check"><input type="checkbox" class="aud" value="CSA"/> CSA / Provincial Regulators</label>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Core Asks <span class="chev">▾</span></summary>
+        <div class="pane list">
+          <label class="check"><input type="checkbox" class="ask" value="Transition Plans" checked/> Mandatory transition plans (IFRS-S2 + B-15 aligned)</label>
+          <label class="check"><input type="checkbox" class="ask" value="Fossil Risk" checked/> Fossil financial-risk discipline & stress tests</label>
+          <label class="check"><input type="checkbox" class="ask" value="Taxonomy" checked/> Finalize science-based taxonomy</label>
+          <label class="check"><input type="checkbox" class="ask" value="Restoration Finance" checked/> Restoration-class instruments & facility</label>
+          <label class="check"><input type="checkbox" class="ask" value="Just Transition" checked/> Just transition & Indigenous leadership</label>
+          <label class="check"><input type="checkbox" class="ask" value="Trust" checked/> Greenwashing guardrails & open data</label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Tone & Framing <span class="chev">▾</span></summary>
+        <div class="pane list">
+          <label class="check"><input type="radio" name="tone" value="pragmatic" checked/> Pragmatic urgency</label>
+          <label class="check"><input type="radio" name="tone" value="investor"/> Investor-readiness & jobs</label>
+          <label class="check"><input type="radio" name="tone" value="resilience"/> Disaster-risk & insurance stability</label>
+        </div>
+      </details>
+
+      <div class="row" style="margin-top:1rem">
+        <button class="btn" id="build">Build Letter</button>
+        <button class="btn" id="copy">Copy to Clipboard</button>
+        <span class="pill">offline-ready</span>
+      </div>
+
+      <div id="preview" class="card" style="margin-top:1rem; padding:1rem; background:rgba(8,14,22,.7)">
+        <h3 style="margin:.2rem 0 0">Preview</h3>
+        <pre id="txt" class="small" style="white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono'; color:var(--muted)"></pre>
+      </div>
+    </aside>
+  </section>
+
+  <!-- EVIDENCE -->
+  <section id="evidence" class="card" style="padding:1.1rem; margin-bottom:7rem">
+    <h2>Why this kit now?</h2>
+    <p class="meta">NGOs have renewed calls for PM-level action on climate-finance risk a decade after the horizon warning; prudential rules (B-15) are live and updating; taxonomy work is on deck; CSA’s pause leaves a vacuum your letters can fill with practical, verifiable steps.</p>
+    <ul class="small">
+      <li>NGO letters urging action at the 10-year mark of the “tragedy of the horizon” speech (Energy Mix/Yahoo republishing).</li>
+      <li>OSFI Guideline B-15: climate risk expectations for FRFIs; updates aligned to Canadian Sustainability Standards Board.</li>
+      <li>Made-in-Canada sustainable investment guidelines/taxonomy in development; disclosure rulemaking status varies.</li>
+    </ul>
+    <p class="small">Design principle: <strong>prenarrative inversion</strong>—show extraction/delay as compounding cost; make peace with nature the profitable default through audit-friendly finance.</p>
+  </section>
+
+  <!-- Drawer -->
+  <div class="drawer card" id="drawer">
+    <div class="tab"><strong>Evidence & Citations</strong><span aria-hidden="true">▾</span></div>
+    <div class="body">
+      <div class="note">
+        • Canadian NGOs urging PM-level climate-finance action at 10-year mark of Carney’s warning (The Energy Mix; also syndicated).<br/>
+        • OSFI B-15 climate-risk guideline and 2025 update letter (prudential expectations for FRFIs).<br/>
+        • Finance Canada “made-in-Canada” sustainable investment guidelines / taxonomy trajectory; CSA issuer rulemaking pause context.
+      </div>
+      <details style="margin-top:.6rem">
+        <summary>Links</summary>
+        <div class="pane small">
+          <ul>
+            <li><a href="https://www.theenergymix.com/groups-urge-pm-carney-to-act-on-climate-finance-risk-10-years-after-key-speech/" target="_blank" rel="noopener">Energy Mix: Groups urge PM Carney to act</a></li>
+            <li><a href="https://ca.finance.yahoo.com/news/groups-urge-pm-carney-act-190627819.html" target="_blank" rel="noopener">Yahoo/BNN: Syndicated coverage</a></li>
+            <li><a href="https://www.osfi-bsif.gc.ca/en/guidance/guidance-library/climate-risk-management" target="_blank" rel="noopener">OSFI Guideline B-15</a></li>
+            <li><a href="https://www.osfi-bsif.gc.ca/en/guidance/guidance-library/letter-industry-we-are-updating-guideline-b-15-final-cssb-standards" target="_blank" rel="noopener">OSFI: 2025 update letter</a></li>
+            <li><a href="https://www.canada.ca/en/department-finance/news/2024/10/government-advances-made-in-canada-sustainable-investment-guidelines-to-accelerate-progress-to-net-zero-emissions-by-2050.html" target="_blank" rel="noopener">Finance Canada: Sustainable investment guidelines</a></li>
+            <li><a href="https://www.torys.com/our-latest-thinking/publications/2025/04/csa-climate-disclosure-rule-on-hold" target="_blank" rel="noopener">Torys: CSA climate disclosure pause</a></li>
+          </ul>
+        </div>
+      </details>
+      <p class="note" style="margin-top:.4rem">Tip: include the preview letter as an attachment, plus a one-page schematic converting each ask into a regulatory instrument (guideline, directive, or budget line).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Smooth anchors ===== */
+document.querySelectorAll('[data-jump]').forEach(b=>{
+  b.addEventListener('click', e=>{
+    const el=document.querySelector(b.dataset.jump);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+
+/* ===== Drawer ===== */
+const drawer=document.getElementById('drawer');
+drawer.querySelector('.tab').addEventListener('click',()=>drawer.classList.toggle('open'));
+
+/* ===== Letter Builder ===== */
+function getChecked(sel){return [...document.querySelectorAll(sel+':checked')].map(x=>x.value)}
+const txt=document.getElementById('txt');
+function build(){
+  const aud=getChecked('.aud');
+  const asks=getChecked('.ask');
+  const tone=(document.querySelector('input[name="tone"]:checked')||{}).value||'pragmatic';
+
+  const toneLine = {
+    pragmatic: "We propose a pragmatic package that prices risk honestly and channels capital toward nature-positive resilience.",
+    investor: "This is an investor-readiness package: clearer rules, cheaper capital for credible plans, and exportable standards.",
+    resilience: "This package is disaster-risk discipline: aligning finance to reduce losses from fires, floods, and heat."
+  }[tone];
+
+  const lines=[
+`Subject: Climate-Finance Alignment for a Restoration Economy`,
+`To: ${aud.join(', ') || 'PMO'}`,
+``,
+`Canada can lead by making restoration the profitable default. Ten years after the horizon warning, we ask you to adopt the following package:`,
+`• Mandatory transition plans (IFRS-S2 + OSFI B-15 touchpoints, board attestation, 3-year updates).`,
+`• Fossil financial-risk discipline (risk weights/provisions, collateral haircuts, robust stress tests).`,
+`• Finalize a science-based sustainable taxonomy with do-no-significant-harm and Indigenous rights criteria.`,
+`• Stand up restoration-class finance (performance notes, Nature Repair Facility, open MRV ledgers).`,
+`• Just transition & Indigenous leadership (worker accounts, FPIC, revenue-sharing, social safeguards).`,
+`• Greenwashing guardrails (Competition Act alignment, standardized dashboards, open data APIs).`,
+``,
+toneLine,
+`We welcome a meeting to operationalize these steps within existing authorities and the next budget cycle.`,
+`— Coordinated NGO signatories`
+  ];
+  txt.textContent = lines.join('\n');
+}
+build();
+document.getElementById('build').addEventListener('click', build);
+document.getElementById('copy').addEventListener('click', async ()=>{
+  await navigator.clipboard.writeText(txt.textContent);
+  const was=txt.textContent;
+  txt.textContent = was + "\n\n[Copied ✓]";
+  setTimeout(()=>{txt.textContent=was}, 800);
+});
+
+/* ===== Animated mycelial network (canvas) ===== */
+const canvas=document.getElementById('mycelium');
+const ctx=canvas.getContext('2d',{alpha:true});
+let W,H,points=[];
+const DPR= Math.min(window.devicePixelRatio||1, 2);
+function resize(){
+  W=canvas.width = Math.floor(innerWidth*DPR);
+  H=canvas.height= Math.floor(innerHeight*DPR);
+  canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px';
+  spawn();
+}
+function spawn(){
+  const n = Math.round((innerWidth*innerHeight)/14000);
+  points = Array.from({length:n}, ()=>({
+    x:Math.random()*W, y:Math.random()*H,
+    vx:(Math.random()*2-1)*0.12*DPR, vy:(Math.random()*2-1)*0.12*DPR,
+    r: (Math.random()*1.5+0.6)*DPR,
+  }));
+}
+function step(){
+  ctx.clearRect(0,0,W,H);
+  // nodes
+  ctx.fillStyle='rgba(119,227,198,0.9)';
+  for(const p of points){
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0||p.x>W) p.vx*=-1;
+    if(p.y<0||p.y>H) p.vy*=-1;
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+  }
+  // links
+  for(let i=0;i<points.length;i++){
+    for(let j=i+1;j<points.length;j++){
+      const a=points[i], b=points[j];
+      const dx=a.x-b.x, dy=a.y-b.y;
+      const d2=dx*dx+dy*dy;
+      if(d2< (160*DPR)*(160*DPR)){
+        const alpha = 0.12*(1 - (d2**0.5)/(160*DPR));
+        ctx.strokeStyle=`rgba(119,227,198,${alpha})`;
+        ctx.lineWidth=0.8*DPR;
+        ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(step);
+}
+addEventListener('resize', resize, {passive:true});
+resize(); step();
+
+/* ===== Parallax tilt on scroll ===== */
+document.addEventListener('scroll', ()=>{
+  const y=window.scrollY||0;
+  const t = y * -0.02;
+  canvas.style.transform = `translateY(${t}px)`;
+}, {passive:true});
+</script>
+</body>
+</html>

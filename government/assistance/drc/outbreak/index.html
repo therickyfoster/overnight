@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mycelial Surge Kit · DRC Ebola + Mpox Continuity</title>
+  <meta name="description" content="Standalone, offline‑first mycelial response kit: explicit operational surge asks (epi, lab, case management) for DRC Ebola 2025 with mpox continuity."/>
+  <style>
+    :root{
+      --bg:#070b17; --fg:#e8f1ff; --muted:#9eb3d9; --accent:#7ae1ff; --accent2:#cba6ff; --ok:#86efac; --warn:#fde047; --bad:#fda4af;
+      --card:#0c1226; --glass: rgba(255,255,255,.06); --border: rgba(255,255,255,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,"Helvetica Neue",Arial; color:var(--fg); background:radial-gradient(1200px 700px at 70% -10%, rgba(122,225,255,.08), transparent 60%),
+      radial-gradient(900px 500px at 10% -10%, rgba(203,166,255,.08), transparent 60%), var(--bg); overflow-x:hidden}
+
+    /* Constellation background */
+    canvas#stars{position:fixed; inset:0; z-index:-1; filter:saturate(1.2) brightness(1.1)}
+
+    header{position:sticky; top:0; backdrop-filter: blur(12px); background:linear-gradient(180deg, rgba(7,11,23,.8), rgba(7,11,23,.35)); border-bottom:1px solid var(--border); z-index:10}
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 20px}
+
+    h1{margin:0; font-size:clamp(22px,4vw,34px); letter-spacing:.3px}
+    .tagline{color:var(--muted); font-size:.95rem}
+
+    main{max-width:1200px; margin:30px auto 100px; padding:0 20px; display:grid; gap:18px}
+    .hero{display:grid; gap:12px; background:linear-gradient(180deg, rgba(122,225,255,.10), rgba(203,166,255,.05)); border:1px solid var(--border); border-radius:18px; padding:20px}
+    .hero .meta{display:flex; gap:12px; flex-wrap:wrap; color:var(--muted)}
+    .chip{border:1px solid var(--border); background:var(--glass); padding:6px 10px; border-radius:999px; font-size:.82rem}
+
+    /* Cards */
+    .grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow: 0 10px 40px rgba(0,0,0,.25)}
+    .card h3{margin:0 0 10px 0}
+    .card p{color:var(--muted); margin:8px 0}
+
+    .ask-list li{margin:8px 0; line-height:1.3}
+
+    /* Accordion */
+    details{border:1px solid var(--border); border-radius:14px; background:var(--card); overflow:hidden}
+    details+details{margin-top:12px}
+    summary{cursor:pointer; list-style:none; padding:14px 16px; font-weight:600; position:relative}
+    summary::marker{display:none}
+    summary:after{content:"＋"; position:absolute; right:16px; transition:transform .25s ease; color:var(--accent)}
+    details[open] summary:after{transform:rotate(45deg)}
+    .panel{padding: 8px 16px 16px; color:var(--muted)}
+
+    /* Checklist */
+    .todo{display:grid; gap:10px}
+    .todo label{display:flex; align-items:flex-start; gap:10px; padding:10px; border:1px dashed var(--border); border-radius:12px; background:rgba(122,225,255,.03)}
+    .todo input{margin-top:4px}
+
+    /* Floating footer */
+    footer{position:fixed; bottom:16px; right:16px; left:16px; display:flex; justify-content:center; pointer-events:none}
+    .badge{pointer-events:auto; user-select:none; display:inline-flex; gap:10px; align-items:center; border:1px solid var(--border); background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); padding:10px 14px; border-radius:999px; font-size:.9rem}
+    .pulse{width:10px; height:10px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 0 rgba(134,239,172,.5); animation:pulse 2s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(134,239,172,.5)} 70%{box-shadow:0 0 0 16px rgba(134,239,172,0)} 100%{box-shadow:0 0 0 0 rgba(134,239,172,0)}}
+
+    /* Buttons */
+    .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:linear-gradient(180deg, rgba(122,225,255,.15), rgba(122,225,255,.05)); color:var(--fg); text-decoration:none; font-weight:600}
+    .btn:active{transform:translateY(1px)}
+
+    .note{font-size:.9rem; color:var(--muted)}
+    code.kbd{border:1px solid var(--border); padding:2px 6px; border-radius:6px; background:rgba(255,255,255,.06)}
+  </style>
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <header>
+    <div class="wrap">
+      <h1>Mycelial Surge Kit · DRC Ebola + Mpox Continuity</h1>
+      <div class="tagline">A lightweight, offline‑first coordination surface with explicit operational asks for surge capacity (epi, lab, case management), plus mpox continuity tracks.</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="meta">
+        <span class="chip">Updated: <span id="now"></span></span>
+        <span class="chip">Mode: <strong>Field‑ready</strong></span>
+        <span class="chip">Connectivity: <strong>Degrades gracefully</strong></span>
+      </div>
+      <div>
+        <p><strong>Snapshot.</strong> Ebola outbreak centered on <em>Bulape, Kasai Province, DRC</em>. Latest public figures indicate ~64 confirmed &amp; probable cases and high CFR; response agencies note slowing efforts and urgent need to reinforce operations. Mpox global emergency status was lifted in Sep 2025, but <em>risk and continuity activities remain essential</em>. Use the surge asks below to mobilize capacity fast.</p>
+        <p class="note">This page is a neutral coordination tool. Numbers auto‑refresh only when reloaded; offline use stores your checklists in your browser (no server).</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>Explicit Operational Ask · Surge Capacity</h3>
+          <ul class="ask-list">
+            <li><strong>Epidemiology (Epi):</strong> case finding &amp; verification, contact listing &amp; follow‑up (21 days), RRT augmentation, data ops, line‑listing, geocoding.</li>
+            <li><strong>Laboratory:</strong> sample collection kits &amp; cold‑chain support, GeneXpert/RT‑PCR throughput, biosafety (PPE, waste mgmt), result‑to‑action SLAs &lt;24h.</li>
+            <li><strong>Case Management:</strong> triage/isolation, IPC/WASH, supportive care (fluids, electrolytes, malaria/HIV co‑care), safe &amp; dignified burials (SDB) teams, survivor care.</li>
+          </ul>
+          <a class="btn" href="#tasks">Open the Taskboard</a>
+        </div>
+        <div class="card">
+          <h3>Continuity Track · Mpox</h3>
+          <p>Continue surveillance, diagnostics access, vaccination networks where available, and clinical pathways for severe‑risk cohorts. Integrate with Epi &amp; Lab pipelines below; same logistics, different assays.</p>
+          <div class="note">Status hint: PHEIC lifted 5 Sep 2025; operational vigilance remains warranted.</div>
+        </div>
+        <div class="card">
+          <h3>Corridors &amp; Deconfliction</h3>
+          <p>Map safe corridors for sample transport, RRT movement, and SDB teams. Use the quick corridor log to capture roadblocks, curfews, or localized insecurity without PII.</p>
+          <button class="btn" id="addCorridor">+ Corridor Note</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tasks" class="grid">
+      <div class="card">
+        <h3>Taskboard · Epidemiology</h3>
+        <div class="todo" data-scope="epi">
+          <label><input type="checkbox"> Deploy 3× RRT cells to Bulape/Mpianga/Dikolo with contact‑tracing kits &amp; GPS‑capable devices.</label>
+          <label><input type="checkbox"> Stand up line‑list pipeline (intake → dedupe → verification → dashboard) with daily cut‑off 18:00 local.</label>
+          <label><input type="checkbox"> Establish 24h alerting for HCW exposures and nosocomial clusters; trigger IPC sweep.</label>
+          <label><input type="checkbox"> Activate ring‑vaccination decision gate (if supply &amp; protocol authorized) aligned to exposure risk.</label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Taskboard · Laboratory</h3>
+        <div class="todo" data-scope="lab">
+          <label><input type="checkbox"> Pre‑position 300 sample kits + triple packaging at peripheral sites; enforce chain‑of‑custody log.</label>
+          <label><input type="checkbox"> Add 2 GeneXpert modules &amp; 1 backup power unit; verify cartridge stock &gt; 2 weeks.</label>
+          <label><input type="checkbox"> Cold‑chain audit: validate coolers, ice packs, data loggers; corrective actions within 24h.</label>
+          <label><input type="checkbox"> Results‑to‑action SOP: deliver positives to case mgmt within 2h of validation.</label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Taskboard · Case Management</h3>
+        <div class="todo" data-scope="care">
+          <label><input type="checkbox"> Expand triage/isolation capacity +15 beds; segregate suspect/probable/confirmed flows.</label>
+          <label><input type="checkbox"> IPC: ensure continuous chlorine supply, PPE rotation schedule, waste burial pit compliance.</label>
+          <label><input type="checkbox"> Supportive care bundles (ORS/IV, antipyretics, empiric antimalarials per protocol, nutrition).</label>
+          <label><input type="checkbox"> Safe &amp; dignified burials: train 3 teams; family liaison &amp; consent scripts prepared.</label>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <details open>
+        <summary>Mycelial Patterns · How this page works</summary>
+        <div class="panel">
+          <p>Think of each team as a node in a living network: short paths, redundant links, rapid signal‑flow. This kit keeps decisions local, auditable, and shareable without central fragility.</p>
+          <ul>
+            <li><strong>Offline‑first:</strong> checklists and corridor notes persist in your browser via <code class="kbd">localStorage</code>.</li>
+            <li><strong>Lightweight:</strong> zero libraries, one file. Safe to airdrop on low bandwidth.</li>
+            <li><strong>Transparent:</strong> an <em>Attestation</em> block records the public sources used to brief this page.</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>Attestation · Sources used to brief</summary>
+        <div class="panel">
+          <p>Paste new notes or situational intel here to keep your local copy current. The following public reports informed this snapshot (add, prune, or replace as needed):</p>
+          <ul id="attestation">
+            <li>WHO DG media briefing (2 Oct 2025) – DRC Ebola situation, scale &amp; operational posture.</li>
+            <li>WHO AFRO updates + notice of response effort slowdowns (2 Oct 2025).</li>
+            <li>Independent reporting and situation summaries corroborating case counts and geography.</li>
+            <li>Mpox status: emergency designation lifted 5 Sep 2025; continuity actions maintained.</li>
+          </ul>
+          <textarea id="notes" placeholder="Add field notes or links…" style="width:100%; min-height:120px; background:transparent; color:var(--fg); border:1px solid var(--border); border-radius:10px; padding:10px"></textarea>
+          <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+            <button class="btn" id="saveNotes">Save notes locally</button>
+            <button class="btn" id="clearNotes">Clear local notes</button>
+          </div>
+          <p class="note">This does not transmit anywhere; it only saves on your device.</p>
+        </div>
+      </details>
+    </section>
+
+    <section>
+      <div class="card">
+        <h3>Quick Corridor Log</h3>
+        <p class="note">Document roadblocks / curfews / contacts for deconfliction. No names or PII.</p>
+        <div id="corridors" class="todo"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="badge" title="Local‑only, no tracking">
+      <div class="pulse" aria-hidden="true"></div>
+      <span>Ready to mobilize · Keep humans safe</span>
+    </div>
+  </footer>
+
+  <script>
+    // Timestamp
+    document.getElementById('now').textContent = new Date().toLocaleString();
+
+    // Constellation canvas (stars + subtle parallax)
+    const cv = document.getElementById('stars');
+    const ctx = cv.getContext('2d');
+    let W,H,stars=[]; let mouseX=0, mouseY=0; const N=220;
+    function res(){W = cv.width = innerWidth; H = cv.height = innerHeight;}
+    addEventListener('resize', res, {passive:true}); res();
+    for(let i=0;i<N;i++){stars.push({x:Math.random()*W,y:Math.random()*H,z:Math.random()*1.2+.2,r:Math.random()*1.2+.2})}
+    addEventListener('mousemove', e=>{mouseX=e.clientX/innerWidth-0.5; mouseY=e.clientY/innerHeight-0.5},{passive:true});
+    function tick(){ctx.clearRect(0,0,W,H); ctx.fillStyle='white';
+      for(const s of stars){const px = s.x + mouseX*20*s.z; const py = s.y + mouseY*20*s.z; ctx.globalAlpha = .3 + s.z*.7; ctx.beginPath(); ctx.arc(px,py,s.r,0,Math.PI*2); ctx.fill();}
+      requestAnimationFrame(tick);
+    } tick();
+
+    // Checklist persistence
+    const scopes = document.querySelectorAll('.todo');
+    scopes.forEach(box=>{
+      const key = 'todo:'+box.dataset.scope;
+      const saved = JSON.parse(localStorage.getItem(key)||'[]');
+      box.querySelectorAll('input[type="checkbox"]').forEach((cb,idx)=>{
+        cb.checked = !!saved[idx];
+        cb.addEventListener('change',()=>{
+          const arr=[...box.querySelectorAll('input')].map(n=>n.checked);
+          localStorage.setItem(key, JSON.stringify(arr));
+        });
+      });
+    });
+
+    // Corridor notes
+    const list = document.getElementById('corridors');
+    function renderCorridors(){
+      const data = JSON.parse(localStorage.getItem('corridors')||'[]');
+      list.innerHTML = '';
+      data.forEach((c,i)=>{
+        const el = document.createElement('label');
+        el.innerHTML = `<input type="checkbox" ${c.done?'checked':''}> <div><strong>${c.title}</strong><br><span class="note">${c.text}</span></div>`;
+        el.querySelector('input').addEventListener('change',(e)=>{c.done=e.target.checked; data[i]=c; localStorage.setItem('corridors', JSON.stringify(data));});
+        list.appendChild(el);
+      })
+    }
+    renderCorridors();
+    document.getElementById('addCorridor').onclick = ()=>{
+      const title = prompt('Short corridor label (e.g., "Bulape ⇄ Mpianga, dusk curfew")');
+      if(!title) return;
+      const text = prompt('Note (e.g., roadblock @ km 12, radio 143.5MHz for clearance)')||'';
+      const data = JSON.parse(localStorage.getItem('corridors')||'[]');
+      data.unshift({title, text, done:false, t: Date.now()});
+      localStorage.setItem('corridors', JSON.stringify(data));
+      renderCorridors();
+    }
+
+    // Notes persistence
+    const notesEl = document.getElementById('notes');
+    notesEl.value = localStorage.getItem('notes')||'';
+    document.getElementById('saveNotes').onclick = ()=> localStorage.setItem('notes', notesEl.value);
+    document.getElementById('clearNotes').onclick = ()=>{ if(confirm('Clear local notes?')){ localStorage.removeItem('notes'); notesEl.value=''; }}
+
+    // Minimal inline service worker for cache‑on‑install (optional)
+    const swCode = `self.addEventListener('install',e=>{e.waitUntil(caches.open('kit-v1').then(c=>c.addAll(['./'])))}); self.addEventListener('fetch', e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})`;
+    if('serviceWorker' in navigator){
+      const blob = new Blob([swCode], {type:'text/javascript'});
+      const url = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(url).catch(()=>{});
+    }
+  </script>
+</body>
+</html>

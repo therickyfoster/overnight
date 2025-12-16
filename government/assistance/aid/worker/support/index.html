@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Peace Web • Civilian Protection & Corridor Support (Chad/South Sudan) — Standalone</title>
+<meta name="description" content="Standalone, offline‑first, animated starfield with mycelial action web for amplifying civilian‑protection & atrocity‑prevention asks. Includes donation routing to neutral implementers and exportable checklists."/>
+<style>
+  :root{
+    --bg:#05060b; --ink:#e6f0ff; --sub:#a9b8d9; --accent:#7df9ff; --lime:#b2ff9e; --amber:#ffd36e; --rose:#ff7d9e; --muted:#6a768f;
+    --card:#0b0e17; --card2:#0e1220; --glow:0 0 20px rgba(125,249,255,.35), 0 0 60px rgba(125,249,255,.15);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(1200px 800px at 70% 10%,#0c1020 0%,#060815 40%,#05060b 100%);color:var(--ink);font:16px/1.55 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Apple Color Emoji,Noto Color Emoji,EmojiOne Mozilla}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  /* Layout */
+  header{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:linear-gradient(to bottom, rgba(5,6,11,.9), rgba(5,6,11,.2) 70%, transparent);backdrop-filter:saturate(1.2) blur(6px);z-index:20}
+  .brand{font-weight:800;letter-spacing:.4px}
+  .pill{border:1px solid #1b2033;background:linear-gradient(180deg,#0c1020,#090c18);border-radius:999px;padding:.3rem .75rem;color:var(--sub)}
+  .wrap{position:relative;min-height:100%;padding-top:64px}
+
+  /* Starfield + parallax constellations */
+  canvas#stars{position:fixed;inset:0;z-index:0}
+  .parallax{position:fixed;inset:0;pointer-events:none;z-index:1}
+  .parallax svg{width:100%;height:100%;opacity:.35}
+
+  /* Content */
+  main{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:2rem 1rem 5rem}
+  .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:1.25rem;align-items:center}
+  .glass{background:linear-gradient(180deg, rgba(17,22,36,.66), rgba(12,16,32,.44));border:1px solid #1d2540;border-radius:18px;box-shadow:var(--glow);padding:1rem}
+  .kicker{color:var(--sub);text-transform:uppercase;letter-spacing:.2em;font-size:.75rem}
+  h1{margin:.25rem 0 0;font-size:2rem;line-height:1.15}
+  .sub{color:var(--sub)}
+  .cta-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;border:1px solid #1c2744;background:linear-gradient(180deg,#0f1426,#0a0f1e);padding:.7rem .9rem;border-radius:12px;color:var(--ink);cursor:pointer}
+  .btn:focus,.btn:hover{outline:0;box-shadow:0 0 0 2px rgba(125,249,255,.25)}
+
+  /* Action cards */
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:1rem;margin-top:1.25rem}
+  .card{grid-column:span 6;background:linear-gradient(180deg,rgba(12,16,32,.66),rgba(7,9,18,.66));border:1px solid #1a2040;border-radius:16px;padding:1rem;position:relative;overflow:hidden}
+  .card small{color:var(--muted)}
+  .badge{font-size:.7rem;padding:.25rem .5rem;border:1px solid #20305a;border-radius:999px;color:var(--sub)}
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
+  .chip{font-size:.75rem;padding:.25rem .5rem;border:1px solid #22335e;border-radius:999px;color:var(--ink)}
+  .steps{margin:.75rem 0 0;padding-left:1.1rem}
+  .steps li{margin:.2rem 0}
+
+  /* Mycelial action web */
+  .web{grid-column:span 12;min-height:420px}
+  .legend{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
+  .legend .item{display:flex;align-items:center;gap:.4rem;background:#0b1022;border:1px solid #1c2744;padding:.35rem .5rem;border-radius:10px}
+  .dot{width:10px;height:10px;border-radius:999px;display:inline-block}
+
+  /* Donation router */
+  .donor{grid-column:span 12;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
+  .donor .card{grid-column:span 4}
+  .meter{height:6px;background:#0b1020;border-radius:999px;overflow:hidden;border:1px solid #1b2342}
+  .meter > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--lime));width:40%}
+
+  /* Tools */
+  .tools{display:flex;flex-wrap:wrap;gap:.5rem}
+  .note{grid-column:span 12}
+  textarea{width:100%;min-height:110px;background:#0a0f1e;color:var(--ink);border:1px solid #1b2342;border-radius:12px;padding:.75rem}
+
+  /* Footer */
+  footer{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 1rem 3rem;color:var(--sub)}
+
+  /* Responsive */
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr}
+    .card{grid-column:span 12}
+    .donor .card{grid-column:span 12}
+  }
+</style>
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div class="parallax" aria-hidden="true">
+    <!-- Morphing constellation overlay (pure SVG, no deps) -->
+    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#7df9ff" stop-opacity=".8"/>
+          <stop offset="100%" stop-color="#7df9ff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g id="layer-stars" fill="url(#glow)"></g>
+      <g id="layer-lines" stroke="#6cbcff" stroke-opacity=".35" stroke-width=".15"></g>
+    </svg>
+  </div>
+
+  <header>
+    <div class="brand">Peace Web</div>
+    <span class="pill">Civilian Protection • Atrocity Prevention • Aid Corridors</span>
+    <span class="pill">Zero‑Harm • Transparency • Sovereignty</span>
+    <div style="margin-left:auto" class="tools">
+      <button class="btn" id="exportPlan">Export Plan JSON</button>
+      <button class="btn" id="printPage">Print / Save PDF</button>
+      <button class="btn" id="resetLocal">Reset Local Data</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <main>
+      <section class="hero">
+        <div class="glass">
+          <div class="kicker">Prenarrative inversion</div>
+          <h1>Amplify civilian‑protection & atrocity‑prevention asks — without destabilization</h1>
+          <p class="sub">Focus: monitoring, targeted sanctions on perpetrators, and scaling humanitarian access along <strong>Chad / South Sudan</strong> corridors. Donations route to neutral implementers (ICRC / vetted INGOs) aligned with their <em>2025 humanitarian appeals</em>. Delay compounds harm; early, verifiable action compounds safety.</p>
+          <div class="cta-row">
+            <button class="btn" data-scroll="#web">See Mycelial Action Web</button>
+            <button class="btn" data-scroll="#donor">Route Donations → Neutral Actors</button>
+            <button class="btn" data-scroll="#notes">Draft Your Local Plan</button>
+          </div>
+          <p style="margin-top:.5rem"><small>Context pulse: <a href="#sources">recent reporting</a> and implementer appeals inform the levers below.</small></p>
+        </div>
+        <div class="glass">
+          <strong>Access‑Safety Plank (built‑in)</strong>
+          <ul class="steps">
+            <li>Do not publicize exact convoy times/routes. Share principle‑based asks, not operational secrets.</li>
+            <li>Preference for neutral, IHL‑anchored actors (ICRC, IFRC, impartial INGOs) for last‑mile delivery.</li>
+            <li>Use verified attestation (receipts, GPS‑blurred heatmaps, independent monitors) for public updates.</li>
+            <li>De‑escalation first: language that preserves face; pressure flows through law, not humiliation.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="grid" aria-label="Action cards">
+        <article class="card">
+          <div class="badge">Civilian‑Protection Monitoring</div>
+          <h3>Independent monitors & reporting loops</h3>
+          <p class="sub">Stand up/scale neutral monitoring with incident triage, trend analytics, and protective referrals.</p>
+          <div class="chips">
+            <span class="chip">Incident hotlines</span>
+            <span class="chip">Community liaisons</span>
+            <span class="chip">IHL briefings</span>
+            <span class="chip">Data minimization</span>
+          </div>
+          <ol class="steps">
+            <li>Fund <em>field monitors</em> attached to neutral orgs; require do‑no‑harm protocols.</li>
+            <li>Deploy offline‑capable reporting (USSD/IVR) with secure, consented intake.</li>
+            <li>Aggregate patterns for <em>protective presence</em> and <em>early warning</em> advisories.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <div class="badge">Targeted Sanctions (Perpetrators)</div>
+          <h3>Behavior‑conditioned financial pressure</h3>
+          <p class="sub">Escalate 
+            <abbr title="Magnitsky-style human-rights sanctions">human‑rights sanctions</abbr> on documented perpetrators; pair with exit‑ramps for compliance.</p>
+          <div class="chips">
+            <span class="chip">Name‑and‑verify</span>
+            <span class="chip">Asset freezes</span>
+            <span class="chip">Arms embargoes</span>
+            <span class="chip">Compliance off‑ramps</span>
+          </div>
+          <ol class="steps">
+            <li>Back listings with <em>independent evidence packets</em> and legal review.</li>
+            <li>Align with regional bodies to avoid aid obstruction blowback.</li>
+            <li>Publish clear 
+              <em>behavioral exit conditions</em> to convert pressure → protection.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <div class="badge">Aid Scale‑Up</div>
+          <h3>Corridor logistics: Chad / South Sudan</h3>
+          <p class="sub">Finance surge pipelines (food, medical, WASH) and <em>deconfliction</em> cells for timely, principled access.</p>
+          <div class="chips">
+            <span class="chip">NGO access cells</span>
+            <span class="chip">Fuel & cold chain</span>
+            <span class="chip">Deconfliction radios</span>
+            <span class="chip">Convoy insurance</span>
+          </div>
+          <ol class="steps">
+            <li>Co‑fund corridor hubs on borders; embed neutral logisticians.</li>
+            <li>Pre‑position rations/kits; maintain 30‑day buffer stocks.</li>
+            <li>Finance safe‑passage MOUs and independent verification.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <div class="badge">Narrative Safety</div>
+          <h3>De‑escalatory messaging & verification</h3>
+          <p class="sub">Replace accusation spirals with <em>verifiable updates</em>, face‑saving language, and survivor‑led signals.</p>
+          <div class="chips">
+            <span class="chip">Face‑saving tone</span>
+            <span class="chip">Third‑party attestations</span>
+            <span class="chip">Survivor consent</span>
+            <span class="chip">Anti‑doxxing</span>
+          </div>
+          <ol class="steps">
+            <li>Publish <em>principle‑based</em> asks; avoid tactical specifics.</li>
+            <li>Attest with neutral receipts & blurred geos; no sensational imagery.</li>
+            <li>Amplify calls from medics, elders, and women‑led groups first.</li>
+          </ol>
+        </article>
+      </section>
+
+      <section id="web" class="grid">
+        <div class="web glass">
+          <div class="legend">
+            <span class="item"><i class="dot" style="background:var(--accent)"></i> Monitors</span>
+            <span class="item"><i class="dot" style="background:var(--lime)"></i> Corridors</span>
+            <span class="item"><i class="dot" style="background:var(--amber)"></i> Donor Nodes</span>
+            <span class="item"><i class="dot" style="background:var(--rose)"></i> Sanctions</span>
+          </div>
+          <svg id="mycelium" viewBox="0 0 900 420" role="img" aria-label="Mycelial action web, interactive"></svg>
+        </div>
+      </section>
+
+      <section id="donor" class="grid donor" aria-label="Donation router">
+        <article class="card">
+          <small>Neutral • IHL‑anchored</small>
+          <h3>ICRC — Protection & Assistance</h3>
+          <p class="sub">Supports protection of civilians, detainee welfare, medical aid, and re‑establishing family links. 
+          
+          </p>
+          <div class="meter" aria-hidden="true"><i style="width:62%"></i></div>
+          <div class="cta-row">
+            <a class="btn" href="https://www.icrc.org/en/donate" target="_blank" rel="noopener">Donate to ICRC</a>
+            <button class="btn add" data-node="ICRC">Add to Plan</button>
+          </div>
+        </article>
+        <article class="card">
+          <small>Neutral • Medical</small>
+          <h3>MSF / Doctors Without Borders</h3>
+          <p class="sub">Emergency medical care, trauma surgery, outbreaks, and malnutrition treatment across borders.</p>
+          <div class="meter" aria-hidden="true"><i style="width:54%"></i></div>
+          <div class="cta-row">
+            <a class="btn" href="https://www.msf.org/donate" target="_blank" rel="noopener">Donate to MSF</a>
+            <button class="btn add" data-node="MSF">Add to Plan</button>
+          </div>
+        </article>
+        <article class="card">
+          <small>Impartial • Multi‑sector</small>
+          <h3>INGO Consortium (WFP/Save/NRC/etc.)</h3>
+          <p class="sub">Food assistance, shelter, protection mainstreaming, and WASH via vetted partners near corridors.</p>
+          <div class="meter" aria-hidden="true"><i style="width:48%"></i></div>
+          <div class="cta-row">
+            <a class="btn" href="https://donate.wfp.org/" target="_blank" rel="noopener">Support WFP</a>
+            <button class="btn add" data-node="WFP/INGOs">Add to Plan</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="notes" class="grid">
+        <article class="card note">
+          <h3>Your Local Plan (private to your browser)</h3>
+          <p class="sub">Use this space to compose a targeted funding‑gap blast to credible donors (philanthropy / crypto circles). IndexedDB keeps this local; export when ready.</p>
+          <textarea id="plan" placeholder="Draft your donor note… e.g., ‘48‑hour bridge finance for corridor fuel & cold chain; neutral verification receipts attached; de‑escalatory language; no route disclosure.’"></textarea>
+          <div class="cta-row">
+            <button class="btn" id="savePlan">Save</button>
+            <button class="btn" id="clearPlan">Clear</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="sources" class="grid">
+        <article class="card" style="grid-column:span 12">
+          <h3>Sources & Attestations</h3>
+          <ul class="steps">
+            <li>Recent reporting snapshot: <a href="https://www.theguardian.com/world/2025/oct/02/refugees-recall-horrors-of-sudan-civil-war" target="_blank" rel="noopener">Refugees recall horrors of Sudan civil war (2025‑10‑02)</a>.</li>
+            <li>Implementer appeals & updates: ICRC, MSF, and WFP publish <em>2025 appeal</em> pages with needs & budget lines; reference them in donor outreach for credibility.</li>
+            <li>Principles: International Humanitarian Law (IHL); do‑no‑harm; data minimization; consent; protection mainstreaming.</li>
+          </ul>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <p><small>Design language: parallax constellations + mycelial webs. All logic runs client‑side; no trackers. This file is shareable, archivable, and printable. Transparency is the prestige layer; secrecy is a deprecated OS.</small></p>
+    </footer>
+  </div>
+
+<script>
+// ===== Animated starfield with depth parallax =====
+(function(){
+  const c=document.getElementById('stars');
+  const ctx=c.getContext('2d');
+  let w=innerWidth,h=innerHeight, DPR= Math.min(devicePixelRatio||1,2);
+  function resize(){w=innerWidth;h=innerHeight;c.width=w*DPR;c.height=h*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);} resize();
+  addEventListener('resize',resize);
+  const stars=Array.from({length:350},()=>({x:Math.random()*w,y:Math.random()*h,z:Math.random()*1.2+.2,s:Math.random()*1.2+.2}));
+  function tick(){
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#ffffff';
+    for(const st of stars){
+      st.x+= (st.z-0.6)*0.25; // slight drift
+      if(st.x<0) st.x=w; if(st.x>w) st.x=0;
+      const r= st.s;
+      ctx.globalAlpha= .3 + st.z*.7;
+      ctx.beginPath();ctx.arc(st.x,st.y,r,0,6.283);ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  } tick();
+})();
+
+// ===== Morphing constellation overlay =====
+(function(){
+  const lines = document.getElementById('layer-lines');
+  const dots = document.getElementById('layer-stars');
+  const N=22; const pts=[];
+  for(let i=0;i<N;i++){pts.push({x:Math.random()*100,y:Math.random()*100});}
+  function draw(){
+    dots.innerHTML=''; lines.innerHTML='';
+    pts.forEach(p=>{
+      const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',Math.random()*0.9+0.3);
+      dots.appendChild(c);
+    });
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.hypot(dx,dy);
+        if(d<18){
+          const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+          l.setAttribute('x1',pts[i].x);l.setAttribute('y1',pts[i].y);
+          l.setAttribute('x2',pts[j].x);l.setAttribute('y2',pts[j].y);
+          lines.appendChild(l);
+        }
+      }
+    }
+  }
+  function nudge(){
+    pts.forEach(p=>{p.x+= (Math.random()-.5)*.6; p.y+= (Math.random()-.5)*.6;});
+    draw(); requestAnimationFrame(nudge);
+  }
+  draw(); nudge();
+})();
+
+// ===== Smooth scroll =====
+for(const b of document.querySelectorAll('[data-scroll]')){
+  b.addEventListener('click',()=>{
+    const el=document.querySelector(b.dataset.scroll);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  })
+}
+
+// ===== Mycelial action web (SVG force-ish layout) =====
+(function(){
+  const svg=document.getElementById('mycelium');
+  const W=900,H=420; const NS='http://www.w3.org/2000/svg';
+  const nodes=[
+    {id:'Hub', x:W/2, y:H/2, r:10, c:'var(--accent)'},
+    {id:'Monitors', x:W*0.25, y:H*0.4, r:9, c:'var(--accent)'},
+    {id:'Corridor:Chad', x:W*0.7, y:H*0.35, r:9, c:'var(--lime)'},
+    {id:'Corridor:SouthSudan', x:W*0.75, y:H*0.65, r:9, c:'var(--lime)'},
+    {id:'Sanctions', x:W*0.38, y:H*0.7, r:9, c:'var(--rose)'},
+    {id:'ICRC', x:W*0.15, y:H*0.2, r:8, c:'var(--amber)'},
+    {id:'MSF', x:W*0.12, y:H*0.75, r:8, c:'var(--amber)'},
+    {id:'WFP/INGOs', x:W*0.88, y:H*0.5, r:8, c:'var(--amber)'}
+  ];
+  const links=[
+    ['Hub','Monitors'],['Hub','Corridor:Chad'],['Hub','Corridor:SouthSudan'],['Hub','Sanctions'],
+    ['Monitors','ICRC'],['Monitors','MSF'],['Corridor:Chad','WFP/INGOs'],['Corridor:SouthSudan','WFP/INGOs'],
+    ['Sanctions','Monitors']
+  ];
+  const gLines=document.createElementNS(NS,'g');svg.appendChild(gLines);
+  const gNodes=document.createElementNS(NS,'g');svg.appendChild(gNodes);
+
+  const nodeEls=new Map();
+  function draw(){
+    gLines.innerHTML=''; gNodes.innerHTML='';
+    // links
+    for(const [a,b] of links){
+      const A=nodes.find(n=>n.id===a), B=nodes.find(n=>n.id===b);
+      const L=document.createElementNS(NS,'line');
+      L.setAttribute('x1',A.x);L.setAttribute('y1',A.y);L.setAttribute('x2',B.x);L.setAttribute('y2',B.y);
+      L.setAttribute('stroke','#6cbcff'); L.setAttribute('stroke-opacity','.3'); L.setAttribute('stroke-width','2');
+      gLines.appendChild(L);
+    }
+    // nodes
+    for(const n of nodes){
+      const C=document.createElementNS(NS,'circle');
+      C.setAttribute('cx',n.x); C.setAttribute('cy',n.y); C.setAttribute('r',n.r);
+      C.setAttribute('fill', n.c);
+      C.style.filter='drop-shadow(0 0 6px rgba(125,249,255,.4))';
+      C.style.cursor='pointer';
+      const T=document.createElementNS(NS,'text');
+      T.setAttribute('x',n.x+12); T.setAttribute('y',n.y+4); T.setAttribute('fill','var(--ink)'); T.style.fontSize='14px';
+      T.textContent=n.id;
+      gNodes.appendChild(C); gNodes.appendChild(T); nodeEls.set(n.id,C);
+      C.addEventListener('click',()=> selectNode(n.id));
+    }
+  }
+  draw();
+
+  let selected=null;
+  function selectNode(id){
+    selected=id;
+    for(const [k,el] of nodeEls){ el.setAttribute('stroke', k===id?'#fff':'none'); el.setAttribute('stroke-width', k===id? '2':'0'); }
+    addToPlan(`[x] Focus node: ${id}`);
+  }
+
+  // gentle float animation
+  function float(){
+    for(const n of nodes){ n.x += (Math.random()-.5)*.6; n.y += (Math.random()-.5)*.6; }
+    draw(); requestAnimationFrame(float);
+  } float();
+})();
+
+// ===== Local plan (IndexedDB‑lite via localStorage for portability) =====
+const key='peaceweb.plan.v1';
+function loadPlan(){
+  const t=document.getElementById('plan');
+  t.value=localStorage.getItem(key)||'';
+}
+function savePlan(){
+  const t=document.getElementById('plan');
+  localStorage.setItem(key,t.value);
+}
+function clearPlan(){
+  localStorage.removeItem(key); loadPlan();
+}
+function addToPlan(line){
+  const t=document.getElementById('plan');
+  t.value = (t.value+"\n"+line).trim(); savePlan();
+}
+loadPlan();
+
+document.getElementById('savePlan').addEventListener('click',savePlan);
+
+document.getElementById('clearPlan').addEventListener('click',()=>{
+  if(confirm('Clear your local draft?')) clearPlan();
+});
+
+document.getElementById('exportPlan').addEventListener('click',()=>{
+  const payload={
+    version:1,
+    generatedAt:new Date().toISOString(),
+    plan:localStorage.getItem(key)||'',
+    selections:[...document.querySelectorAll('.add.active')].map(b=>b.dataset.node)
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='peace-web-plan.json'; a.click(); URL.revokeObjectURL(a.href);
+});
+
+document.getElementById('printPage').addEventListener('click',()=>window.print());
+
+document.getElementById('resetLocal').addEventListener('click',()=>{
+  if(confirm('Reset all local data for this page?')){ localStorage.removeItem(key); document.querySelectorAll('.add').forEach(b=>b.classList.remove('active')); loadPlan(); }
+});
+
+document.querySelectorAll('.add').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    btn.classList.toggle('active');
+    if(btn.classList.contains('active')){ btn.textContent='Added ✓'; addToPlan(`[x] Donate / coordinate with ${btn.dataset.node}`); }
+    else { btn.textContent='Add to Plan'; }
+  });
+});
+</script>
+</body>
+</html>

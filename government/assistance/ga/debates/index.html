@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GA debates + Flash Appeals → “We need help now” Indicators</title>
+  <meta name="description" content="Standalone, offline‑first dashboard that turns UN General Assembly debates and OCHA Flash Appeals into clear, actionable ‘help now’ indicators. Focuses on bottlenecks: money, corridors, deconfliction." />
+  <style>
+    :root{
+      --bg:#0b0f19; --card:#121826; --ink:#e6edf6; --muted:#a3b1c6; --good:#38d39f; --warn:#ffd166; --bad:#ff6b6b; --accent:#7aa2ff;
+    }
+    html,body{height:100%}
+    body{margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji"; color:var(--ink); background:radial-gradient(1200px 800px at 10% 10%,#111a2e 0%,#0b0f19 50%,#060913 100%);}    
+    .stars{position:fixed; inset:0; pointer-events:none; background-image:radial-gradient(2px 2px at 20% 30%,#ffffff66 0,transparent 60%),radial-gradient(2px 2px at 80% 70%,#ffffff44 0,transparent 60%),radial-gradient(1px 1px at 50% 50%,#ffffff22 0,transparent 60%);}    
+    .grid{display:grid; gap:16px}
+    .wrap{max-width:1200px; margin:0 auto; padding:24px}
+    header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0;}
+    h1{font-size:clamp(20px,2.6vw,36px); line-height:1.1; margin:0}
+    h2{font-size:clamp(16px,2vw,22px); margin:0; color:var(--muted)}
+    .card{background:linear-gradient(180deg,#121826 0%, #0f1421 100%); border:1px solid #24314a; box-shadow:0 6px 24px #0008; border-radius:16px; padding:16px}
+    .pill{display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:6px 10px; border:1px solid #26324a; background:#0e1523}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+    .grow{flex:1 1 320px}
+    .kpi{display:grid; grid-template-columns:64px 1fr auto; gap:12px; align-items:center}
+    .kpi h3{margin:0; font-weight:600}
+    .muted{color:var(--muted)}
+    .btn{cursor:pointer; display:inline-flex; align-items:center; gap:8px; border-radius:12px; padding:10px 14px; border:1px solid #26324a; background:#0e1523; color:var(--ink)}
+    .btn:hover{border-color:#36507c}
+    .cols-3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
+    @media (max-width:900px){.cols-3{grid-template-columns:1fr}}
+    .gauge{width:64px; height:64px}
+    .table{width:100%; border-collapse:separate; border-spacing:0 8px}
+    .table th{font-weight:600; text-align:left; color:var(--muted); font-size:14px}
+    .table td, .table th{padding:8px 10px}
+    .rowcard{background:#0f1626; border:1px solid #22324d; border-radius:12px}
+    details{border:1px solid #22324d; border-radius:12px; padding:12px 14px; background:#0f1626}
+    details summary{cursor:pointer; font-weight:600}
+    footer{opacity:.8; font-size:13px; padding:24px 0}
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .tag{font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid #2b3c61; background:#0c1322; color:#cde}
+    .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .hero{border:1px solid #24314a; border-radius:16px; padding:16px; background:linear-gradient(180deg,#0d1526 0%,#0a1120 50%,#09101e 100%)}
+    .note{font-size:13px; color:#cbd5e1}
+  </style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+  <div class="wrap grid" id="app">
+    <header>
+      <div>
+        <h1>GA debates + Flash Appeals → <span style="color:var(--accent)">Help‑Now Indicators</span></h1>
+        <h2>Turn formal signals into action. Bottlenecks: <strong>Money</strong>, <strong>Corridors</strong>, <strong>Deconfliction</strong>.</h2>
+      </div>
+      <div class="row">
+        <button class="btn" id="exportBrief">Copy ‘Help‑Now’ Brief</button>
+        <button class="btn" id="saveState">Save</button>
+        <button class="btn" id="resetState" title="Clear local data">Reset</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="row" style="justify-content:space-between; align-items:flex-start">
+        <div class="grow">
+          <div class="row" style="gap:8px; margin-bottom:10px">
+            <span class="pill">Formal signal: <strong>UN GA debates</strong></span>
+            <span class="pill">Operational signal: <strong>OCHA Flash Appeals</strong></span>
+            <span class="pill">Priority: <strong>Help‑Now</strong></span>
+          </div>
+          <p class="muted">Use this dashboard to translate diplomatic debate + flash appeal activation into a concrete, auditable ask: fund the gap, open corridors, and deconflict routes so assistance reaches civilians fast.</p>
+          <p class="note">Works offline. Your edits persist locally. Click “Copy ‘Help‑Now’ Brief” to share a one‑pager with decision‑makers.</p>
+        </div>
+        <div style="min-width:280px" class="card">
+          <div class="row" style="justify-content:space-between; align-items:center">
+            <strong>Context</strong>
+            <span class="tag" id="ctxTag">Gaza / oPt — 2025</span>
+          </div>
+          <div style="height:8px"></div>
+          <label class="muted" for="ctx">Edit context</label>
+          <textarea id="ctx" class="mono" style="width:100%; min-height:84px; background:#0b1220; color:var(--ink); border:1px solid #24314a; border-radius:8px; padding:8px">General Assembly debates following Security Council veto; Flash Appeals used as formal ‘we need help now’ signal. Bottlenecks remain funding, access corridors, and deconfliction.</textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid cols-3">
+      <!-- MONEY KPI -->
+      <div class="card">
+        <div class="kpi">
+          <svg class="gauge" viewBox="0 0 36 36" aria-label="Funding gauge">
+            <path d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="#1f2b45" stroke-width="3"/>
+            <path id="g_funding" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="var(--bad)" stroke-linecap="round" stroke-width="3" stroke-dasharray="0,100"/>
+          </svg>
+          <div>
+            <h3>Funding Gap</h3>
+            <div class="muted">Flash Appeal requirement vs. funded</div>
+          </div>
+          <div style="text-align:right">
+            <div id="fundedPct" style="font-size:22px; font-weight:700">—</div>
+            <div class="muted" id="fundedNum">—</div>
+          </div>
+        </div>
+        <div style="height:8px"></div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Appeal</th><th>Requirement (USD)</th><th>Funded</th><th>Gap</th>
+            </tr>
+          </thead>
+          <tbody id="appeals"></tbody>
+        </table>
+        <div class="row" style="justify-content:space-between; margin-top:8px">
+          <button class="btn" id="addAppeal">Add Appeal</button>
+          <div class="row">
+            <a class="btn" href="https://fts.unocha.org/" target="_blank" rel="noopener">Open FTS</a>
+            <a class="btn" href="https://data.humdata.org/organization/ocha-fts" target="_blank" rel="noopener">Download Data</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- CORRIDORS KPI -->
+      <div class="card">
+        <div class="kpi">
+          <svg class="gauge" viewBox="0 0 36 36" aria-label="Corridors gauge">
+            <path d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="#1f2b45" stroke-width="3"/>
+            <path id="g_corridors" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="var(--warn)" stroke-linecap="round" stroke-width="3" stroke-dasharray="0,100"/>
+          </svg>
+          <div>
+            <h3>Access Corridors</h3>
+            <div class="muted">Open vs. blocked humanitarian routes</div>
+          </div>
+          <div style="text-align:right">
+            <div id="corridorOpenPct" style="font-size:22px; font-weight:700">—</div>
+            <div class="muted" id="corridorCounts">—</div>
+          </div>
+        </div>
+        <div id="corridorList" class="grid" style="margin-top:8px; gap:8px"></div>
+        <div class="row" style="justify-content:space-between; margin-top:8px">
+          <button class="btn" id="addCorridor">Add Corridor</button>
+          <a class="btn" href="https://www.unocha.org/humanitarian-access" target="_blank" rel="noopener">Access Guidance</a>
+        </div>
+      </div>
+
+      <!-- DECONFLICTION KPI -->
+      <div class="card">
+        <div class="kpi">
+          <svg class="gauge" viewBox="0 0 36 36" aria-label="Deconfliction gauge">
+            <path d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="#1f2b45" stroke-width="3"/>
+            <path id="g_deconflict" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="var(--bad)" stroke-linecap="round" stroke-width="3" stroke-dasharray="0,100"/>
+          </svg>
+          <div>
+            <h3>Deconfliction</h3>
+            <div class="muted">Incidents & notifications</div>
+          </div>
+          <div style="text-align:right">
+            <div id="deconflictScore" style="font-size:22px; font-weight:700">—</div>
+            <div class="muted" id="deconflictMeta">—</div>
+          </div>
+        </div>
+        <div class="grid" id="deconflictList" style="margin-top:8px; gap:8px"></div>
+        <div class="row" style="justify-content:space-between; margin-top:8px">
+          <button class="btn" id="addDec">Add Incident/Note</button>
+          <div class="row">
+            <a class="btn" href="https://msf-crash.org/en/war-and-humanitarianism/deconfliction-effective-protection-arrangement" target="_blank" rel="noopener">What is deconfliction?</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <h3 style="margin:0">Compose → ‘We need help now’ one‑pager</h3>
+        <span class="tag">Generates from your data</span>
+      </div>
+      <textarea id="brief" class="mono" style="width:100%; min-height:180px; background:#0b1220; color:var(--ink); border:1px solid #24314a; border-radius:8px; padding:8px"></textarea>
+      <div class="row" style="justify-content:flex-end; gap:8px; margin-top:8px">
+        <button class="btn" id="regenBrief">Regenerate</button>
+        <button class="btn" id="copyBrief">Copy to Clipboard</button>
+      </div>
+    </section>
+
+    <section class="grid" style="gap:16px">
+      <details open>
+        <summary>Reference & verification links</summary>
+        <div class="row" style="flex-wrap:wrap; gap:8px; margin-top:8px">
+          <a class="tag" href="https://press.un.org/en/2025/ga12727.doc.htm" target="_blank" rel="noopener">UN Press GA/12727 (GA debates context)</a>
+          <a class="tag" href="https://www.unocha.org/publications/report/world/flash-appeal-quick-guide" target="_blank" rel="noopener">OCHA: Flash Appeal (quick guide)</a>
+          <a class="tag" href="https://fts.unocha.org/" target="_blank" rel="noopener">OCHA: Financial Tracking Service (funding)</a>
+          <a class="tag" href="https://www.unocha.org/humanitarian-access" target="_blank" rel="noopener">OCHA: Humanitarian access</a>
+          <a class="tag" href="https://msf-crash.org/en/war-and-humanitarianism/deconfliction-effective-protection-arrangement" target="_blank" rel="noopener">MSF CRASH: Deconfliction explainer</a>
+          <a class="tag" href="https://humanitarianaction.info/" target="_blank" rel="noopener">Humanitarian Action (plans & dashboards)</a>
+        </div>
+        <p class="note" style="margin-top:8px">This file is standalone; the links above open authoritative sources. Update the numbers below as new FTS data arrives.</p>
+      </details>
+    </section>
+
+    <footer class="muted">
+      Built for rapid, auditable decision‑making. Extraction, secrecy, and delay are high‑cost legacy OS. Transparency, peace, and regenerative logistics are the default upgrade.
+    </footer>
+  </div>
+
+  <script>
+  // --- Local data model (editable) ---
+  const state = {
+    appeals: [
+      { name: "oPt Flash Appeal 2025", requirement: 4000000000, funded: 1700000000 },
+      { name: "Lebanon Flash Appeal 2024", requirement: 1200000000, funded: 480000000 },
+    ],
+    corridors: [
+      { name: "Rafah land crossing", status: "blocked", notes: "Border closure; sporadic openings." },
+      { name: "Kerem Shalom – aid lane", status: "partial", notes: "Throughput restricted; inspections & insecurity." },
+      { name: "Aerial drops – coastal", status: "unsafe", notes: "High loss/wind drift; not a substitute for land." },
+    ],
+    deconflict: [
+      { type: "incident", severity: 3, text: "Aid convoy delayed due to shelling proximal to corridor." },
+      { type: "notification", severity: 1, text: "Clinic coordinates shared via notification system." }
+    ],
+    contextTag: "Gaza / oPt — 2025",
+    contextText: document.querySelector('#ctx')?.value || ''
+  };
+
+  // Persist/restore
+  const load = () => {
+    try{const s = JSON.parse(localStorage.getItem('helpnow_state')); if(s){Object.assign(state,s);} }catch(e){}
+  };
+  const save = () => localStorage.setItem('helpnow_state', JSON.stringify(state));
+
+  // Formatters
+  const fmtUSD = n => `$${(n/1e9>=1? (n/1e9).toFixed(2)+'B' : n/1e6>=1? (n/1e6).toFixed(1)+'M' : n.toLocaleString())}`;
+  const clamp = (n,a,b)=>Math.max(a,Math.min(b,n));
+  const setGauge = (el,pct,colorVar) => {
+    const dash = clamp(pct,0,100);
+    el.setAttribute('stroke-dasharray', `${(dash*100/100)*1.005}, 100`);
+    if(colorVar) el.setAttribute('stroke', colorVar);
+  };
+
+  // Renderers
+  function renderAppeals(){
+    const tbody = document.getElementById('appeals');
+    tbody.innerHTML = '';
+    let totalReq = 0, totalFunded = 0;
+    state.appeals.forEach((a,idx)=>{
+      totalReq += a.requirement; totalFunded += a.funded;
+      const gap = Math.max(0, a.requirement - a.funded);
+      const tr = document.createElement('tr'); tr.className='rowcard';
+      tr.innerHTML = `<td>${a.name}</td>
+        <td class="mono">${fmtUSD(a.requirement)}</td>
+        <td class="mono">${fmtUSD(a.funded)}</td>
+        <td class="mono">${fmtUSD(gap)}</td>`;
+      tr.onclick = ()=>{
+        const name = prompt('Appeal name', a.name) || a.name;
+        const req = +prompt('Requirement (USD)', a.requirement) || a.requirement;
+        const fund = +prompt('Funded (USD)', a.funded) || a.funded;
+        state.appeals[idx] = {name, requirement:req, funded:fund}; save(); render();
+      };
+      tbody.appendChild(tr);
+    });
+    const fundedPct = totalReq>0 ? Math.round((totalFunded/totalReq)*100) : 0;
+    document.getElementById('fundedPct').textContent = fundedPct+"% funded";
+    document.getElementById('fundedNum').textContent = fmtUSD(totalFunded) + ' / ' + fmtUSD(totalReq);
+    setGauge(document.getElementById('g_funding'), fundedPct, fundedPct>=60?'var(--good)':fundedPct>=35?'var(--warn)':'var(--bad)');
+  }
+
+  function renderCorridors(){
+    const root = document.getElementById('corridorList'); root.innerHTML='';
+    let open=0, total=state.corridors.length;
+    state.corridors.forEach((c,idx)=>{
+      const card = document.createElement('div'); card.className='rowcard'; card.style.padding='10px';
+      const color = c.status==='open'?'var(--good)':(c.status==='partial'?'var(--warn)':'var(--bad)');
+      card.innerHTML = `<div class="row" style="justify-content:space-between; align-items:center">
+        <div class="row" style="gap:10px"><strong>${c.name}</strong><span class="tag" style="border-color:${color}; color:${color}">${c.status}</span></div>
+        <button class="btn">Edit</button>
+      </div>
+      <div class="muted" style="margin-top:6px">${c.notes||''}</div>`;
+      card.querySelector('.btn').onclick = ()=>{
+        const name = prompt('Corridor name', c.name) || c.name;
+        const status = (prompt('Status [open|partial|blocked|unsafe]', c.status) || c.status).toLowerCase();
+        const notes = prompt('Notes', c.notes||'') || c.notes;
+        state.corridors[idx] = {name,status,notes}; save(); render();
+      };
+      if(c.status==='open') open++;
+      root.appendChild(card);
+    });
+    const pct = total? Math.round((open/total)*100):0;
+    document.getElementById('corridorOpenPct').textContent = pct+"% open";
+    document.getElementById('corridorCounts').textContent = `${open}/${total} routes open`;
+    setGauge(document.getElementById('g_corridors'), pct, pct>=60?'var(--good)':pct>=35?'var(--warn)':'var(--bad)');
+  }
+
+  function renderDeconflict(){
+    const root = document.getElementById('deconflictList'); root.innerHTML='';
+    const scale = {1: 'low', 2: 'medium', 3: 'high'};
+    let incidents = 0;
+    state.deconflict.forEach((d,idx)=>{
+      if(d.type==='incident') incidents++;
+      const color = d.type==='incident'? 'var(--bad)' : 'var(--warn)';
+      const card = document.createElement('div'); card.className='rowcard'; card.style.padding='10px';
+      card.innerHTML = `<div class="row" style="justify-content:space-between; align-items:center">
+        <div class="row" style="gap:8px"><span class="tag" style="border-color:${color}; color:${color}">${d.type}</span><strong>severity:</strong><span>${scale[d.severity]||d.severity}</span></div>
+        <button class="btn">Edit</button>
+      </div>
+      <div class="muted" style="margin-top:6px">${d.text||''}</div>`;
+      card.querySelector('.btn').onclick = ()=>{
+        const type = (prompt('Type [incident|notification]', d.type)||d.type).toLowerCase();
+        const severity = +prompt('Severity 1..3', d.severity)||d.severity;
+        const text = prompt('Text', d.text||'')||d.text;
+        state.deconflict[idx] = {type,severity,text}; save(); render();
+      };
+      root.appendChild(card);
+    });
+    const score = clamp(100 - incidents*20, 0, 100);
+    document.getElementById('deconflictScore').textContent = score+"/100";
+    document.getElementById('deconflictMeta').textContent = incidents+" recent incident(s)";
+    setGauge(document.getElementById('g_deconflict'), score, score>=60?'var(--good)':score>=35?'var(--warn)':'var(--bad)');
+  }
+
+  function regenBrief(){
+    const totalReq = state.appeals.reduce((a,b)=>a+b.requirement,0);
+    const totalFunded = state.appeals.reduce((a,b)=>a+b.funded,0);
+    const fundedPct = totalReq? Math.round((totalFunded/totalReq)*100):0;
+    const open = state.corridors.filter(c=>c.status==='open').length;
+    const partial = state.corridors.filter(c=>c.status==='partial').length;
+    const blocked = state.corridors.filter(c=>c.status!=='open' && c.status!=='partial').length;
+    const incidents = state.deconflict.filter(d=>d.type==='incident').length;
+
+    const text = `HELP‑NOW BRIEF — ${state.contextTag}\n\n`+
+    `Formal signals: GA debates acknowledged the severity of humanitarian need; OCHA Flash Appeals activated/updated.\n`+
+    `Funding bottleneck: ${fundedPct}% funded — ${fmtUSD(totalFunded)} of ${fmtUSD(totalReq)}. Immediate top‑ups needed to keep pipelines alive.\n`+
+    `Access bottleneck: Corridors open/partial/blocked → ${open}/${partial}/${blocked}. Prioritize opening land routes; air/sea are supplemental.\n`+
+    `Deconfliction bottleneck: ${incidents} recent incident(s). Strengthen notification, route separation, and contact protocols.\n\n`+
+    `Action pack (48–72h):\n`+
+    `• MONEY: Release emergency tranches against FTS‑linked projects; enforce transparency milestones.\n`+
+    `• CORRIDORS: Negotiate protected windows + neutral monitors; pre‑position fuel/trucks.\n`+
+    `• DECONFLICTION: Share updated coordinates; 24/7 hotline; mirrored logs to prevent tampering.\n\n`+
+    `Public line (truth‑first): Funding, corridors, and deconfliction are the levers. Delay compounds harm; opening them compounds survival.`;
+
+    document.getElementById('brief').value = text;
+  }
+
+  // Events
+  document.getElementById('addAppeal').onclick = ()=>{
+    const name = prompt('Appeal name'); if(!name) return;
+    const requirement = +prompt('Requirement (USD)')||0;
+    const funded = +prompt('Funded (USD)')||0;
+    state.appeals.push({name, requirement, funded}); save(); render();
+  };
+  document.getElementById('addCorridor').onclick = ()=>{
+    const name = prompt('Corridor name'); if(!name) return;
+    const status = (prompt('Status [open|partial|blocked|unsafe]','partial')||'partial').toLowerCase();
+    const notes = prompt('Notes','');
+    state.corridors.push({name,status,notes}); save(); render();
+  };
+  document.getElementById('addDec').onclick = ()=>{
+    const type = (prompt('Type [incident|notification]','incident')||'incident').toLowerCase();
+    const severity = +prompt('Severity 1..3','2')||2;
+    const text = prompt('Text','');
+    state.deconflict.push({type,severity,text}); save(); render();
+  };
+  document.getElementById('saveState').onclick = ()=>{save(); alert('Saved locally.');};
+  document.getElementById('resetState').onclick = ()=>{ if(confirm('Clear local data?')){ localStorage.removeItem('helpnow_state'); location.reload(); }};
+  document.getElementById('copyBrief').onclick = ()=>{ navigator.clipboard.writeText(document.getElementById('brief').value).then(()=>alert('Brief copied.')); };
+  document.getElementById('exportBrief').onclick = ()=>regenBrief();
+  document.getElementById('regenBrief').onclick = ()=>regenBrief();
+
+  // Context editing
+  document.getElementById('ctx').addEventListener('input', (e)=>{ state.contextText = e.target.value; save(); });
+  document.getElementById('ctxTag').textContent = state.contextTag;
+
+  // Init
+  load();
+  render();
+  function render(){ renderAppeals(); renderCorridors(); renderDeconflict(); regenBrief(); }
+  </script>
+</body>
+</html>

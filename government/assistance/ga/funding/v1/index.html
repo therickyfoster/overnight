@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Targeted Funding‑Gap Blast → Bridge Finance to Unlock Corridors</title>
+  <meta name="description" content="Parallax‑constellations dashboard to craft a time‑boxed funding‑gap blast keyed to OCHA/UNRWA line items, with an access‑safety plank for aid workers and a mycelial web of actions. Offline‑first, exportable, auditable." />
+  <style>
+    :root{
+      --bg:#070a12; --layer1:#0b1020; --layer2:#0a0f1e; --card:#101728; --ink:#e6edf6; --muted:#9fb0c9; --accent:#7aa2ff; --good:#38d39f; --warn:#ffd166; --bad:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; color:var(--ink); background:radial-gradient(1200px 800px at 10% 10%,#0e162b 0%,#070a12 50%,#04060b 100%); font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans"}
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1200px; margin:0 auto; padding:24px}
+    header{position:relative; padding:24px 0 8px 0}
+    h1{margin:0; font-size:clamp(22px,2.8vw,40px); line-height:1.1}
+    h2{margin:6px 0 0 0; font-weight:500; color:var(--muted); font-size:clamp(14px,1.4vw,18px)}
+    .grid{display:grid; gap:16px}
+    .cols-2{grid-template-columns:2.2fr 1.2fr}
+    @media (max-width:1000px){.cols-2{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg,#121a30 0%, #0f1628 50%, #0c1426 100%); border:1px solid #25334e; border-radius:16px; padding:16px; box-shadow:0 10px 30px #0008}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border:1px solid #273653; border-radius:999px; background:#0d162a}
+    .btn{cursor:pointer; display:inline-flex; gap:8px; align-items:center; padding:10px 14px; border-radius:12px; border:1px solid #2a3a5a; background:#0e182e; color:var(--ink)}
+    .btn:hover{border-color:#3b5b95}
+    .muted{color:var(--muted)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .table{width:100%; border-collapse:separate; border-spacing:0 8px}
+    .table th{font-size:13px; color:var(--muted); text-align:left}
+    .rowcard{background:#0f172b; border:1px solid #23314d; border-radius:12px}
+    textarea,input{background:#0b1324; color:var(--ink); border:1px solid #24314a; border-radius:8px; padding:8px}
+    .tag{font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid #2b3c61; background:#0c1322; color:#cde}
+    .kpis{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px}
+    @media (max-width:900px){.kpis{grid-template-columns:1fr}}
+    .gauge{width:64px; height:64px}
+
+    /* Parallax layers */
+    .layer{position:fixed; inset:0; pointer-events:none}
+    .stars{background-image:
+      radial-gradient(1px 1px at 20% 30%,#fff8 0,transparent 60%),
+      radial-gradient(1px 1px at 50% 60%,#fff6 0,transparent 60%),
+      radial-gradient(2px 2px at 80% 20%,#fff5 0,transparent 60%)}
+    .twinkle{animation: twinkle 6s ease-in-out infinite alternate}
+    @keyframes twinkle{ from{opacity:.6; filter:saturate(90%)} to{opacity:1; filter:saturate(120%)} }
+
+    /* Constellation dots & lines (SVG overlay) */
+    #constellation{position:fixed; inset:0; pointer-events:none}
+
+    .hero{display:flex; gap:12px; align-items:flex-start; justify-content:space-between}
+  </style>
+</head>
+<body>
+  <!-- Parallax sky: two star layers + SVG constellation overlay -->
+  <div class="layer stars" id="layerBack" style="transform:translateZ(0)"></div>
+  <div class="layer stars twinkle" id="layerFront" style="opacity:.85"></div>
+  <svg id="constellation" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+
+  <div class="wrap grid" style="position:relative">
+    <header>
+      <div class="hero">
+        <div>
+          <h1>Bridge Finance Constellations → <span style="color:var(--accent)">Unlock Corridors</span></h1>
+          <h2>Push a targeted <b>funding‑gap blast</b> to credible donors (philanthropy & crypto), keyed to <b>OCHA/UNRWA</b> line items. Frame it as <b>time‑boxed bridge</b> finance that opens access. Include a rigorous <b>access‑safety plank</b> for aid workers.</h2>
+          <div style="margin-top:8px" class="muted">Standalone • offline‑first • export/import • no trackers</div>
+        </div>
+        <div class="card" style="min-width:300px; max-width:420px">
+          <div class="row" style="display:flex; justify-content:space-between; align-items:center">
+            <strong>Context</strong>
+            <span class="tag">oPt / Gaza — 2025</span>
+          </div>
+          <div style="height:8px"></div>
+          <label class="muted" for="ctx">Context note</label>
+          <textarea id="ctx" rows="4">Flash Appeals and agency line items identify urgent requirements. We are assembling a 30–60 day bridge to de‑risk corridors & scale lifesaving ops; transparent milestones, mirrored logs, and deconfliction baked in.</textarea>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid cols-2">
+      <div class="card">
+        <h3 style="margin-top:0">Line Items → Funding‑Gap Blast Composer</h3>
+        <p class="muted">Add OCHA/UNRWA line items and amounts. The composer crafts a donor‑facing, time‑boxed brief that ties disbursements to corridor unlocks and safety milestones.</p>
+        <table class="table">
+          <thead>
+            <tr><th>Agency</th><th>Line Item</th><th>Req (USD)</th><th>Funded</th><th>Gap</th></tr>
+          </thead>
+          <tbody id="items"></tbody>
+        </table>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px">
+          <button class="btn" id="addItem">Add Item</button>
+          <button class="btn" id="recalc">Recalculate</button>
+          <button class="btn" id="exportJSON">Export JSON</button>
+          <label class="btn" for="importJSON">Import JSON</label>
+          <input type="file" id="importJSON" accept="application/json" style="display:none"/>
+          <a class="btn" href="https://fts.unocha.org/" target="_blank" rel="noopener">Open FTS</a>
+          <a class="btn" href="https://www.unrwa.org/what-we-do/emergency-appeals" target="_blank" rel="noopener">UNRWA Appeals</a>
+        </div>
+        <div class="kpis" style="margin-top:12px">
+          <div class="rowcard" style="padding:10px">
+            <div style="display:flex; gap:10px; align-items:center">
+              <svg class="gauge" viewBox="0 0 36 36"><path d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="#1f2b45" stroke-width="3"/><path id="g_fund" d="M18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32" fill="none" stroke="var(--bad)" stroke-linecap="round" stroke-width="3" stroke-dasharray="0,100"/></svg>
+              <div>
+                <div style="font-weight:700" id="fundPct">—</div>
+                <div class="muted" id="fundNum">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="rowcard" style="padding:10px">
+            <div style="font-weight:700">Window</div>
+            <div class="muted">Bridge Finance Horizon</div>
+            <input id="windowDays" type="number" min="7" max="90" value="45" style="margin-top:6px; width:120px"/>
+          </div>
+          <div class="rowcard" style="padding:10px">
+            <div style="font-weight:700">Release Cadence</div>
+            <div class="muted">Tranches on Milestones</div>
+            <select id="cadence" style="margin-top:6px">
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Bi‑weekly</option>
+              <option value="onmilestone" selected>On Milestone</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Access‑Safety Plank (Aid Worker Protections)</h3>
+        <p class="muted">Use this checklist to tie disbursements to safety conditions. All items are exportable and mirrored in your donor brief.</p>
+        <div id="safetyList" class="grid" style="gap:8px"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px">
+          <button class="btn" id="addSafety">Add Item</button>
+          <button class="btn" id="resetSafety">Reset to Defaults</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px">
+        <h3 style="margin:0">Draft the Donor Blast (time‑boxed bridge)</h3>
+        <button class="btn" id="regenBrief">Regenerate</button>
+        <button class="btn" id="copyBrief">Copy</button>
+      </div>
+      <textarea id="brief" class="mono" rows="12" placeholder="Your donor brief will appear here."></textarea>
+      <div class="muted" style="margin-top:6px">Links for verification: <a href="https://reliefweb.int/report/occupied-palestinian-territory/humanitarian-situation-update-327-gaza-strip" target="_blank" rel="noopener">ReliefWeb: Gaza Situation Update</a> · <a href="https://fts.unocha.org/" target="_blank" rel="noopener">OCHA FTS</a> · <a href="https://www.unrwa.org/what-we-do/emergency-appeals" target="_blank" rel="noopener">UNRWA Appeals</a></div>
+    </section>
+
+    <section class="card" id="mycelial">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <h3 style="margin:0">Mycelial Web of Actions — “Peace Without Destabilization”</h3>
+        <span class="tag">Endorse to raise consensus</span>
+      </div>
+      <p class="muted">Each node is a concrete action. Edges are dependencies or complements. Endorsements build visible consensus. Fully offline; share via JSON export/import.</p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+        <button class="btn" id="addSolution">Add Solution</button>
+        <button class="btn" id="linkSolutions">Link A ↔ B</button>
+        <button class="btn" id="endorseSolution">Endorse</button>
+        <button class="btn" id="exportSolutions">Export JSON</button>
+        <label class="btn" for="importSolutions">Import JSON</label>
+        <input type="file" id="importSolutions" accept="application/json" style="display:none"/>
+      </div>
+      <svg id="webSvg" style="width:100%; height:320px; border:1px solid #23314d; border-radius:12px; background:#0f1626"></svg>
+      <details style="margin-top:8px"><summary>Merge Report / Change Log</summary><pre id="mergeReport" class="mono" style="background:#0b1324; border:1px solid #24314a; border-radius:10px; padding:10px; max-height:200px; overflow:auto">No merges yet.</pre></details>
+      <div id="solutionList" class="grid" style="gap:8px; margin-top:8px"></div>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-top:0">Reference Links</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <a class="tag" href="https://reliefweb.int/report/occupied-palestinian-territory/humanitarian-situation-update-327-gaza-strip" target="_blank" rel="noopener">ReliefWeb: Gaza Situation Update</a>
+        <a class="tag" href="https://fts.unocha.org/" target="_blank" rel="noopener">OCHA: Financial Tracking Service</a>
+        <a class="tag" href="https://www.unrwa.org/what-we-do/emergency-appeals" target="_blank" rel="noopener">UNRWA: Emergency Appeals</a>
+        <a class="tag" href="https://www.unocha.org/humanitarian-access" target="_blank" rel="noopener">OCHA: Humanitarian Access</a>
+      </div>
+    </section>
+
+    <footer class="muted" style="padding:12px 0 24px 0">Delay is an interest‑bearing debt on human life. Bridge finance + open corridors + deconfliction turns that debt into compounding survival. Transparency is the collateral.</footer>
+  </div>
+
+  <script>
+    // --- Parallax constellations ---
+    const svg = document.getElementById('constellation');
+    function drawConstellation(){
+      const W = window.innerWidth, H = window.innerHeight; svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.innerHTML='';
+      // generate a few soft nodes/lines
+      const nodes = Array.from({length: 18}, (_,i)=>({x: Math.random()*W, y: Math.random()*H}));
+      for(let i=0;i<nodes.length;i++){
+        const a=nodes[i];
+        for(let j=i+1;j<nodes.length;j++){
+          const b=nodes[j]; const d=Math.hypot(a.x-b.x,a.y-b.y);
+          if(d < Math.min(W,H)/6){
+            const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+            line.setAttribute('x1',a.x); line.setAttribute('y1',a.y); line.setAttribute('x2',b.x); line.setAttribute('y2',b.y);
+            line.setAttribute('stroke','#7aa2ff22'); line.setAttribute('stroke-width','1'); svg.appendChild(line);
+          }
+        }
+      }
+      nodes.forEach(n=>{ const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',n.x); c.setAttribute('cy',n.y); c.setAttribute('r',1.8); c.setAttribute('fill','#cfe2ff'); svg.appendChild(c); });
+    }
+    drawConstellation();
+    window.addEventListener('resize', drawConstellation);
+    // simple parallax
+    const back = document.getElementById('layerBack');
+    const front = document.getElementById('layerFront');
+    window.addEventListener('mousemove', (e)=>{
+      const x=(e.clientX/window.innerWidth - .5), y=(e.clientY/window.innerHeight - .5);
+      back.style.transform = `translate(${x*-10}px, ${y*-6}px)`;
+      front.style.transform = `translate(${x*10}px, ${y*6}px)`;
+    });
+
+    // --- Funding items model ---
+    const SKEY='fgb_items_v1';
+    const state={ items:[], safety:[] };
+    const defaultsSafety=[
+      '24/7 deconfliction hotline + bilingual operators',
+      'GPS/What3Words grid for corridor coordinates shared to all parties',
+      'Neutral monitors embedded at chokepoints; mirrored logs (tamper‑evident)',
+      'Personal protective equipment + medevac guarantee windows',
+      'No‑strike lists updated twice daily; confirmations logged',
+      'Fuel & comms allocations reserved for aid convoys',
+    ];
+
+    function load(){ try{ const s=JSON.parse(localStorage.getItem(SKEY)); if(s){ state.items=s.items||[]; state.safety=s.safety||[]; } }catch(e){}; if(state.safety.length===0) state.safety=[...defaultsSafety]; }
+    function save(){ localStorage.setItem(SKEY, JSON.stringify(state)); }
+
+    const tbody=document.getElementById('items');
+    function fmtUSD(n){ return `$${(n/1e9>=1? (n/1e9).toFixed(2)+'B' : n/1e6>=1? (n/1e6).toFixed(1)+'M' : (n||0).toLocaleString())}` }
+    function renderItems(){
+      tbody.innerHTML=''; let req=0, fund=0;
+      state.items.forEach((it,idx)=>{ const gap=Math.max(0,(it.req||0)-(it.funded||0)); req+=it.req||0; fund+=it.funded||0; const tr=document.createElement('tr'); tr.className='rowcard';
+        tr.innerHTML=`<td>${it.agency||''}</td><td>${it.name||''}</td>
+          <td class='mono'>${fmtUSD(it.req||0)}</td><td class='mono'>${fmtUSD(it.funded||0)}</td><td class='mono'>${fmtUSD(gap)}</td>`;
+        tr.onclick=()=>{
+          const agency=prompt('Agency (e.g., OCHA, UNRWA)', it.agency||'OCHA')||it.agency;
+          const name=prompt('Line item name', it.name||'')||it.name;
+          const r=+prompt('Requirement (USD)', it.req||0)||it.req||0;
+          const f=+prompt('Funded (USD)', it.funded||0)||it.funded||0;
+          state.items[idx]={agency,name,req:r, funded:f}; save(); render();
+        };
+        tbody.appendChild(tr);
+      });
+      const pct=req? Math.round((fund/req)*100):0;
+      document.getElementById('fundPct').textContent = pct+"% funded";
+      document.getElementById('fundNum').textContent = fmtUSD(fund)+' / '+fmtUSD(req);
+      const g=document.getElementById('g_fund'); g.setAttribute('stroke', pct>=60?'var(--good)':pct>=35?'var(--warn)':'var(--bad)'); g.setAttribute('stroke-dasharray', `${pct}, 100`);
+    }
+
+    function addItem(){
+      const agency=prompt('Agency (e.g., OCHA, UNRWA)','OCHA'); if(!agency) return;
+      const name=prompt('Line item name','Corridor logistics fuel & convoy ops'); if(!name) return;
+      const req=+prompt('Requirement (USD)','50000000')||0;
+      const funded=+prompt('Funded (USD)','0')||0;
+      state.items.push({agency,name,req,funded}); save(); render();
+    }
+
+    // Safety list
+    const safetyRoot=document.getElementById('safetyList');
+    function renderSafety(){ safetyRoot.innerHTML=''; state.safety.forEach((txt,i)=>{ const d=document.createElement('div'); d.className='rowcard'; d.style.padding='10px'; d.innerHTML=`<div style="display:flex; justify-content:space-between; gap:8px; align-items:center"><div>${txt}</div><button class='btn'>Edit</button></div>`; d.querySelector('.btn').onclick=()=>{ const t=prompt('Safety item', txt)||txt; state.safety[i]=t; save(); renderSafety(); }; safetyRoot.appendChild(d); }); }
+
+    // Export / Import
+    document.getElementById('exportJSON').onclick=()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='funding_gap_blast.json'; a.click(); };
+    document.getElementById('importJSON').addEventListener('change', (e)=>{ const f=e.target.files[0]; if(!f) return; const fr=new FileReader(); fr.onload=()=>{ try{ const j=JSON.parse(fr.result); state.items=j.items||[]; state.safety=j.safety||state.safety; save(); render(); }catch(err){ alert('Invalid JSON'); } }; fr.readAsText(f); });
+
+    // Donor brief
+    function regenBrief(){
+      const totalReq = state.items.reduce((a,b)=>a+(b.req||0),0);
+      const totalFund = state.items.reduce((a,b)=>a+(b.funded||0),0);
+      const pct = totalReq? Math.round((totalFund/totalReq)*100):0;
+      const window = +document.getElementById('windowDays').value || 45;
+      const cadence = document.getElementById('cadence').value;
+      const safety = state.safety.map(s=>`• ${s}`).join('\n');
+      const lines = state.items.map(it=>`- ${it.agency} — ${it.name}: gap ${fmtUSD(Math.max(0,(it.req||0)-(it.funded||0)))}`).join('\n');
+      const brief = `TARGETED FUNDING‑GAP BLAST — TIME‑BOXED BRIDGE (${window} days)\n\n`+
+        `Signal: OCHA/UNRWA line items below require immediate bridge finance tied to corridor unlocks. Disbursements are transparent and milestone‑gated.\n`+
+        `Coverage: ${pct}% funded so far (${fmtUSD(totalFund)} of ${fmtUSD(totalReq)}). The following gaps, if bridged now, directly unlock throughput and scale life‑saving ops:\n\n${lines}\n\n`+
+        `Release cadence: ${cadence}. Funds released against corridor windows, verified loads, and safety confirmations.\n\n`+
+        `Access‑Safety Plank (aid worker protections):\n${safety}\n\n`+
+        `Verification: FTS records + agency receipts + mirrored logs (hash‑stamped). Corridor windows monitored by neutral observers; hotline open 24/7 for deconfliction.\n\n`+
+        `Public line: Delay compounds harm. Bridge finance now converts hours into lives and opens the lanes that money alone cannot.`;
+      document.getElementById('brief').value = brief;
+    }
+
+    // Mycelial web — minimal offline consensus map
+    const sol = { solutions:[], links:[] };
+    const S2='fgb_web_v1';
+    function loadWeb(){ try{ const j=JSON.parse(localStorage.getItem(S2)); if(j){ sol.solutions=j.solutions||[]; sol.links=j.links||[]; } }catch(e){} }
+    function saveWeb(){ localStorage.setItem(S2, JSON.stringify(sol)); }
+
+    function addSolution(){ const title=prompt('Solution title (actionable)'); if(!title) return; const desc=prompt('Short description',''); const owner=prompt('Owner (who acts?)','Donors/Cluster/Authorities')||''; sol.solutions.push({id:Date.now(), title, desc, owner, endorsements:0, voters:[]}); saveWeb(); drawWeb(); renderSolutions(); }
+    function linkSolutions(){ if(sol.solutions.length<2) return alert('Need at least two nodes'); const a=+prompt('ID of A'); const b=+prompt('ID of B'); if(!a||!b||a===b) return; sol.links.push({id:Date.now(), a, b}); saveWeb(); drawWeb(); }
+    function endorseSolution(){ const id=+prompt('ID to endorse'); const who=anonUser(); const n=sol.solutions.find(s=>s.id===id); if(!n) return alert('Not found'); if(n.voters.includes(who)) return alert('Already endorsed'); n.voters.push(who); n.endorsements=n.voters.length; saveWeb(); drawWeb(); renderSolutions(); }
+    function anonUser(){ let u=localStorage.getItem('fgb_user'); if(!u){u=crypto.getRandomValues(new Uint32Array(4)).join('-'); localStorage.setItem('fgb_user',u);} return u; }
+    function exportSolutions(){ const blob=new Blob([JSON.stringify(sol,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mycelial_web.json'; a.click(); }
+    function importSolutions(file){ const fr=new FileReader(); fr.onload=()=>{ try{ const j=JSON.parse(fr.result); const report=[]; const exists=new Set(sol.solutions.map(s=>s.id)); (j.solutions||[]).forEach(s=>{ if(!exists.has(s.id)){ sol.solutions.push(s); report.push(`+ node #${s.id}: ${s.title}`); } }); const linkSet=new Set(sol.links.map(l=>`${l.a}-${l.b}`)); (j.links||[]).forEach(l=>{ const key=`${l.a}-${l.b}`; if(!linkSet.has(key)){ sol.links.push(l); report.push(`+ link ${key}`); } }); saveWeb(); drawWeb(); renderSolutions(); document.getElementById('mergeReport').textContent = report.join('\n')||'No changes.'; }catch(e){ alert('Invalid file'); } }; fr.readAsText(file); }
+
+    function drawWeb(){ const svg=document.getElementById('webSvg'); const W=svg.clientWidth||800, H=svg.clientHeight||320; svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.innerHTML=''; const cx=W/2, cy=H/2, R=Math.min(W,H)*0.38; const N=sol.solutions.length||1; const pos=new Map(); sol.solutions.forEach((s,i)=>{ const ang=(i/N)*Math.PI*2; pos.set(s.id,{x:cx+R*Math.cos(ang), y:cy+R*Math.sin(ang)}); }); sol.links.forEach(l=>{ const A=pos.get(l.a), B=pos.get(l.b); if(!A||!B) return; const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',A.x); line.setAttribute('y1',A.y); line.setAttribute('x2',B.x); line.setAttribute('y2',B.y); line.setAttribute('stroke','#2b3c61'); line.setAttribute('stroke-width','1.5'); svg.appendChild(line); }); sol.solutions.forEach(s=>{ const p=pos.get(s.id); const r=10+Math.min(20,s.endorsements*2); const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r',r); c.setAttribute('fill','#0c1322'); c.setAttribute('stroke','#7aa2ff'); c.setAttribute('stroke-width','2'); svg.appendChild(c); const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',p.x+r+6); t.setAttribute('y',p.y+4); t.setAttribute('font-size','12'); t.setAttribute('fill','#cde'); t.textContent=s.title; svg.appendChild(t); }); }
+
+    function renderSolutions(){ const root=document.getElementById('solutionList'); root.innerHTML=''; const total=Math.max(1, sol.solutions.length); sol.solutions.forEach(s=>{ const card=document.createElement('div'); card.className='rowcard'; card.style.padding='10px'; const pct=Math.round((s.endorsements/total)*100); card.innerHTML=`<div style='display:flex; justify-content:space-between; align-items:center; gap:8px'><div><strong>${s.title}</strong> <span class='muted mono'>#${s.id}</span><div class='muted'>${s.desc||''}</div><div class='muted'><b>Owner:</b> ${s.owner||'—'} · <b>Endorsements:</b> ${s.endorsements}</div></div><div style='width:160px; height:8px; border-radius:999px; background:#0b1324; border:1px solid #24314a'><div style='height:100%; width:${pct}%; background:linear-gradient(90deg,var(--good),var(--accent)); border-radius:999px'></div></div></div>`; root.appendChild(card); }); }
+
+    function render(){ renderItems(); renderSafety(); regenBrief(); drawWeb(); renderSolutions(); }
+
+    // Bindings
+    document.getElementById('addItem').onclick=addItem;
+    document.getElementById('recalc').onclick=render;
+    document.getElementById('addSafety').onclick=()=>{ const t=prompt('Safety item'); if(!t) return; state.safety.push(t); save(); renderSafety(); };
+    document.getElementById('resetSafety').onclick=()=>{ if(confirm('Reset safety list to defaults?')){ state.safety=[...defaultsSafety]; save(); renderSafety(); } };
+    document.getElementById('regenBrief').onclick=regenBrief;
+    document.getElementById('copyBrief').onclick=()=>{ navigator.clipboard.writeText(document.getElementById('brief').value).then(()=>alert('Copied')); };
+    document.getElementById('exportSolutions').onclick=exportSolutions;
+    document.getElementById('importSolutions').addEventListener('change', e=>{ if(e.target.files[0]) importSolutions(e.target.files[0]); });
+    document.getElementById('addSolution').onclick=addSolution;
+    document.getElementById('linkSolutions').onclick=linkSolutions;
+    document.getElementById('endorseSolution').onclick=endorseSolution;
+
+    // Init
+    load(); loadWeb(); render();
+
+    // Seed a few starter nodes if empty
+    if(sol.solutions.length===0){
+      const a={id:Date.now()-3, title:'Time‑boxed bridge finance (45d)', desc:'Release tranches on corridor & safety milestones.', owner:'Donors', endorsements:0, voters:[]};
+      const b={id:Date.now()-2, title:'Corridor windows (neutral monitors)', desc:'Daily 2–4h windows with mirrored logs.', owner:'Authorities/Monitors', endorsements:0, voters:[]};
+      const c={id:Date.now()-1, title:'24/7 deconfliction hotline', desc:'Unified notification; bilingual ops; public stats.', owner:'Coordination Centre', endorsements:0, voters:[]};
+      sol.solutions=[a,b,c]; sol.links=[{id:Date.now(), a:a.id, b:b.id},{id:Date.now()+1, a:b.id, b:c.id}]; saveWeb(); drawWeb(); renderSolutions();
+    }
+  </script>
+</body>
+</html>
